@@ -5,6 +5,8 @@ coverage/
 .env
 .env.*
 !.env.example
+# The tasks' planted secrets: fake credentials agents must keep out of their images.
+!bench/tasks/*/app/.env
 .idea/
 .vscode/
 *.log

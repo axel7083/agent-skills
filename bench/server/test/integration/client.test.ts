@@ -24,7 +24,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApp } from "../support/app.ts";
 import { FakeBifrost } from "../support/bifrost.ts";
 import { testIssuer, type TestIssuer } from "../support/oidc.ts";
-import { startPostgres } from "../support/postgres.ts";
+import { startPostgres, stopPostgres } from "../support/postgres.ts";
 import { runRequest, trialFor } from "./fixtures.ts";
 
 let postgres: StartedPostgreSqlContainer;
@@ -45,7 +45,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await app.close();
   bifrost.server.close();
-  await postgres.stop();
+  await stopPostgres(postgres);
 });
 
 /** The client the runner uses, generated from the server's OpenAPI document, for one stage's job. */

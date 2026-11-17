@@ -31,3 +31,14 @@ export async function startPostgres(): Promise<StartedPostgreSqlContainer> {
   }
   return new PostgreSqlContainer(IMAGE).withDatabase("bench").withUsername("bench").withPassword("bench").start();
 }
+
+/**
+ * Stops the container, logging instead of failing when the engine can't clean up: rootless Podman on
+ * GitHub's runners sometimes refuses to tear down its network namespace ("rootless netns: kill
+ * network process: permission denied") once the tests have passed.
+ */
+export async function stopPostgres(container: StartedPostgreSqlContainer | undefined): Promise<void> {
+  await container?.stop().catch((error: unknown) => {
+    console.warn(`stopping Postgres failed, left to the runner: ${String(error)}`);
+  });
+}

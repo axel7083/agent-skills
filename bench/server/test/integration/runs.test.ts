@@ -24,7 +24,7 @@ import { SweeperService } from "../../src/sweeper/sweeper.service.ts";
 import { FakeBifrost } from "../support/bifrost.ts";
 import { startApp } from "../support/app.ts";
 import { testIssuer, type TestIssuer } from "../support/oidc.ts";
-import { startPostgres } from "../support/postgres.ts";
+import { startPostgres, stopPostgres } from "../support/postgres.ts";
 import { runRequest, trialFor } from "./fixtures.ts";
 
 let postgres: StartedPostgreSqlContainer;
@@ -44,7 +44,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await app.close();
   bifrost.server.close();
-  await postgres.stop();
+  await stopPostgres(postgres);
 });
 
 /** Each test is its own workflow run; the previous one is completed or abandoned first. */
