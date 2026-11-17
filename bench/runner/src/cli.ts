@@ -25,7 +25,7 @@ import { oracles } from "./commands/oracles.ts";
 import { plan } from "./commands/plan.ts";
 
 const USAGE = `usage: bench-runner <command> [options]
-  plan      --server URL --skill NAME --cells JSON --trials N --max-usd USD
+  plan      --server URL --skill NAME --cells JSON --trials N --max-usd USD [--tasks A,B]
   agent     --server URL --run ID --skill NAME --shard JSON --trials N --harbor PATH --out DIR
   grade     --skill NAME --shard JSON --attempt N --in DIR --out FILE
   complete  --server URL --run ID --in DIR
@@ -44,6 +44,7 @@ const { values, positionals } = parseArgs({
     trials: { type: "string" },
     attempt: { type: "string" },
     "max-usd": { type: "string" },
+    tasks: { type: "string", default: "" },
     harbor: { type: "string", default: "harbor" },
     in: { type: "string" },
     out: { type: "string" },
@@ -58,7 +59,14 @@ function required(name: keyof typeof values): string {
 
 switch (command) {
   case "plan":
-    await plan({ server: required("server"), skill: required("skill"), cells: required("cells"), trials: Number(required("trials")), maxUsd: Number(required("max-usd")) });
+    await plan({
+      server: required("server"),
+      skill: required("skill"),
+      cells: required("cells"),
+      trials: Number(required("trials")),
+      maxUsd: Number(required("max-usd")),
+      tasks: values.tasks,
+    });
     break;
   case "agent":
     await agent({

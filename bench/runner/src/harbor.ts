@@ -99,7 +99,9 @@ function gatewayModel(key: MintedKey, model: string): string {
 /** Harbor's agent arguments for a harness talking to the gateway with the shard's key. */
 export function agentArgs(shard: Shard, key: MintedKey): string[] {
   const model = gatewayModel(key, shard.model);
-  const version = ["--ak", `version=${harnessVersion(shard.harness)}`];
+  // skip_model_parsing: Harbor would otherwise resolve the name through litellm's provider table; the
+  // gateway's `<provider>/<model>` must reach the CLI unchanged.
+  const version = ["--ak", `version=${harnessVersion(shard.harness)}`, "--ak", "skip_model_parsing=true"];
   switch (shard.harness) {
     case "claude-code":
       return [

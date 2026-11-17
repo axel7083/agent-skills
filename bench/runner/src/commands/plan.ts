@@ -37,11 +37,17 @@ export interface PlanOptions {
   readonly cells: string;
   readonly trials: number;
   readonly maxUsd: number;
+  /** A subset of the eval's tasks, comma-separated (a smoke run); all of them when empty. */
+  readonly tasks: string;
 }
 
 /** Registers the run with the server and writes the agent jobs' matrix as a step output. */
 export async function plan(options: PlanOptions): Promise<void> {
-  const spec = loadEval(options.skill);
+  const evalSpec = loadEval(options.skill);
+  const subset = options.tasks.split(",").map((task) => task.trim()).filter((task) => task !== "");
+  const unknown = subset.filter((task) => !evalSpec.tasks.includes(task));
+  if (unknown.length > 0) throw new Error(`not tasks of ${evalSpec.skill}: ${unknown.join(", ")}`);
+  const spec = subset.length === 0 ? evalSpec : { ...evalSpec, tasks: subset };
   const skillFile = readFileSync(join(SKILLS_DIR, spec.skill, "SKILL.md"), "utf8");
   const frontMatter = SkillFrontMatter.parse(parse(/^---\n([\s\S]*?)\n---/.exec(skillFile)?.[1] ?? ""));
   // The skill's tree: any change to any of its files is a new version of what is measured.

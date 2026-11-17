@@ -37,7 +37,7 @@ const shard = (harness: Shard["harness"]): Shard => ({ id: "s001", harness, mode
 
 describe("agentArgs", () => {
   it("routes every harness through the gateway with the shard's model", () => {
-    expect(agentArgs(shard("claude-code"), key)).toEqual(expect.arrayContaining(["claude-code", "enmaas/gpt-oss-120b", "ANTHROPIC_AUTH_TOKEN=sk-bf-test"]));
+    expect(agentArgs(shard("claude-code"), key)).toEqual(expect.arrayContaining(["claude-code", "enmaas/gpt-oss-120b", "ANTHROPIC_AUTH_TOKEN=sk-bf-test", "skip_model_parsing=true"]));
     expect(agentArgs(shard("codex"), key)).toEqual(expect.arrayContaining(["codex", "OPENAI_BASE_URL=https://llm.test/v1"]));
     const opencode = agentArgs(shard("opencode"), key);
     expect(opencode).toEqual(expect.arrayContaining(["bench/enmaas/gpt-oss-120b", "BENCH_API_KEY=sk-bf-test"]));

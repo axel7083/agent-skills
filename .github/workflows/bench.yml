@@ -35,6 +35,11 @@ on:
         description: 'Harness × model cells, JSON: [{"harness":"opencode","model":"..."}]'
         required: true
         type: string
+      tasks:
+        description: Only these tasks of the eval, comma-separated (a smoke run); all when empty
+        required: false
+        default: ""
+        type: string
       trials:
         description: Trials per task, arm and cell
         required: true
@@ -83,7 +88,8 @@ jobs:
           CELLS: ${{ inputs.cells }}
           TRIALS: ${{ inputs.trials }}
           MAX_USD: ${{ inputs.max-usd }}
-        run: $RUNNER plan --server "$BENCH_SERVER_URL" --skill "$SKILL" --cells "$CELLS" --trials "$TRIALS" --max-usd "$MAX_USD"
+          TASKS: ${{ inputs.tasks }}
+        run: $RUNNER plan --server "$BENCH_SERVER_URL" --skill "$SKILL" --cells "$CELLS" --trials "$TRIALS" --max-usd "$MAX_USD" --tasks "$TASKS"
 
   agent:
     needs: plan
