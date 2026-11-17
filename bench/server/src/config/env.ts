@@ -49,8 +49,10 @@ const RawEnv = z.object({
   BIFROST_ADMIN_PASSWORD: Secret,
   /** What runners reach: the edge in front of Bifrost's inference paths. */
   BIFROST_PUBLIC_URL: z.url({ protocol: /^https?$/ }),
-  /** The provider holding the upstream key, declared in Bifrost's config. */
+  /** The providers holding the upstream key, declared in Bifrost's config: OpenAI-compatible (Codex, opencode)… */
   BIFROST_PROVIDER: z.string().regex(/^[a-z0-9-]+$/).default("enmaas"),
+  /** …and Anthropic Messages (Claude Code), on the same endpoint: no translation between the two. */
+  BIFROST_ANTHROPIC_PROVIDER: z.string().regex(/^[a-z0-9-]+$/).default("enmaas-anthropic"),
   /** USD per token for every model a run may use: a model without a price is refused. */
   PRICES_FILE: z.string().min(1).default("/etc/bench/prices.json"),
 

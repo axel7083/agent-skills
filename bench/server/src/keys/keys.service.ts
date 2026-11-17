@@ -81,7 +81,10 @@ export class KeysService {
       const lifetimeMinutes = Math.min(run.request.trials * run.request.agentTimeoutMinutes + KEY_MARGIN_MINUTES, MAX_KEY_HOURS * 60);
       const expiresAt = new Date(now.getTime() + lifetimeMinutes * 60_000);
       const name = `bench-${String(run.githubRunId)}-${String(principal.runAttempt)}-${shardId}`;
+      // Claude Code speaks Anthropic Messages, the other harnesses OpenAI's API.
+      const provider = shard.harness === "claude-code" ? this.env.BIFROST_ANTHROPIC_PROVIDER : this.env.BIFROST_PROVIDER;
       const created = await this.bifrost.create({
+        provider,
         name,
         limitUsd,
         expiresAt,
@@ -100,7 +103,7 @@ export class KeysService {
         key: created.key,
         anthropicBaseUrl: `${base}/anthropic`,
         openaiBaseUrl: `${base}/v1`,
-        provider: this.env.BIFROST_PROVIDER,
+        provider,
         expiresAt: expiresAt.toISOString(),
         limitUsd,
       };

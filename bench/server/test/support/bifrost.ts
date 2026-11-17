@@ -23,7 +23,7 @@ import { z } from "zod";
 const CreateBody = z.object({
   name: z.string(),
   budgets: z.array(z.object({ max_limit: z.number() })),
-  provider_configs: z.array(z.object({ allowed_models: z.array(z.string()) })),
+  provider_configs: z.array(z.object({ provider: z.string(), allowed_models: z.array(z.string()) })),
   expires_at: z.string(),
 });
 const UpdateBody = z.object({ is_active: z.boolean().optional() });
@@ -37,6 +37,7 @@ interface FakeKey {
   name: string;
   active: boolean;
   limitUsd: number;
+  provider: string;
   models: string[];
   usageUsd: number;
   usageTokens: number;
@@ -62,6 +63,7 @@ export class FakeBifrost {
           name: body.name,
           active: true,
           limitUsd: body.budgets[0]?.max_limit ?? 0,
+          provider: body.provider_configs[0]?.provider ?? "",
           models: body.provider_configs[0]?.allowed_models ?? [],
           usageUsd: 0,
           usageTokens: 0,

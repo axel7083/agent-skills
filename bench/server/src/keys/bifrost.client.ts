@@ -51,11 +51,12 @@ export interface BifrostSettings {
   readonly adminUrl: string;
   readonly username: string;
   readonly password: string;
-  readonly provider: string;
   readonly requestsPerMinute: number;
 }
 
 export interface KeyRequest {
+  /** The Bifrost provider the key may use. */
+  readonly provider: string;
   readonly name: string;
   readonly limitUsd: number;
   readonly expiresAt: Date;
@@ -69,7 +70,7 @@ export interface KeyUsage {
 }
 
 /**
- * Virtual keys over the provider holding the upstream key. Authenticated with Bifrost's admin
+ * Virtual keys over the providers holding the upstream key. Authenticated with Bifrost's admin
  * credentials, which never leave this class; the admin API is reachable from the server only.
  */
 export class BifrostClient {
@@ -85,11 +86,11 @@ export class BifrostClient {
 
   async create(request: KeyRequest): Promise<{ readonly key: string; readonly id: string }> {
     const models = [...new Set(request.models)];
-    await this.ensurePrices(models);
+    await this.ensurePrices(request.provider, models);
     const created = await this.request("create key", "POST", "/api/governance/virtual-keys", CreatedKey, {
       name: request.name,
       metadata: request.metadata,
-      provider_configs: [{ provider: this.settings.provider, allowed_models: models, key_ids: ["*"] }],
+      provider_configs: [{ provider: request.provider, allowed_models: models, key_ids: ["*"] }],
       budgets: [{ max_limit: request.limitUsd, reset_duration: BUDGET_RESET }],
       rate_limit: { request_max_limit: this.settings.requestsPerMinute, request_reset_duration: "1m" },
       expires_at: request.expiresAt.toISOString(),
@@ -124,8 +125,7 @@ export class BifrostClient {
   }
 
   /** One provider-scoped price override per model, created or brought back to the pinned price. */
-  private async ensurePrices(models: readonly string[]): Promise<void> {
-    const provider = this.settings.provider;
+  private async ensurePrices(provider: string, models: readonly string[]): Promise<void> {
     const query = new URLSearchParams({ scope_kind: "provider", provider_id: provider });
     const listed = await this.request("list price overrides", "GET", `/api/governance/pricing-overrides?${query.toString()}`, Overrides);
     const existing = new Map<string, { readonly id: string | undefined; readonly patch: unknown }>();

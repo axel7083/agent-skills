@@ -190,6 +190,18 @@ describe("budgets", () => {
     expect(minted).toEqual([201, 201, 201, 201, 402, 402, 402, 402]);
   });
 
+  it("mints Claude Code's keys on the Anthropic provider, the others' on the OpenAI-compatible one", async () => {
+    const response = await call("POST", "/v1/runs", "plan", { ...runRequest, cells: [{ harness: "claude-code", model: "glm-4.6" }, { harness: "opencode", model: "glm-4.6" }] });
+    const { runId, shards } = CreateRunResponse.parse(response.json());
+    const providers: string[] = [];
+    for (const harness of ["claude-code", "opencode"]) {
+      const shard = shards.find((candidate) => candidate.harness === harness);
+      const minted = MintedKey.parse((await call("POST", `/v1/runs/${runId}/shards/${shard?.id ?? ""}/key`, "agent")).json());
+      providers.push(`${minted.provider}:${bifrost.byName(`bench-${String(githubRun)}-1-${shard?.id ?? ""}`)?.provider ?? ""}`);
+    }
+    expect(providers).toEqual(["enmaas-anthropic:enmaas-anthropic", "enmaas:enmaas"]);
+  });
+
   it("gives a re-run what settled keys left over", async () => {
     const { runId, shards } = await createRun();
     for (const shard of shards) {

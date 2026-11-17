@@ -71,7 +71,6 @@ import { SweeperService } from "./sweeper/sweeper.service.ts";
             adminUrl: env.BIFROST_ADMIN_URL,
             username: env.BIFROST_ADMIN_USERNAME,
             password: env.BIFROST_ADMIN_PASSWORD,
-            provider: env.BIFROST_PROVIDER,
             requestsPerMinute: env.KEY_REQUESTS_PER_MINUTE,
           },
           prices,

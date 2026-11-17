@@ -10,7 +10,10 @@
     "disable_content_logging": true,
     "log_retention_days": 30,
     "allowed_origins": [],
-    "allowed_headers": ["anthropic-beta", "anthropic-version"]
+    "allowed_headers": [
+      "anthropic-beta",
+      "anthropic-version"
+    ]
   },
   "config_store": {
     "enabled": true,
@@ -45,15 +48,57 @@
   },
   "providers": {
     "enmaas": {
-      "keys": [{ "name": "enmaas", "value": "env.ENMAAS_KEY", "models": ["*"], "weight": 1 }],
-      "network_config": { "base_url": "https://api.enmaas.devshift.net" },
-      "concurrency_and_buffer_size": { "concurrency": 16, "buffer_size": 16 },
+      "keys": [
+        {
+          "name": "enmaas",
+          "value": "env.ENMAAS_KEY",
+          "models": [
+            "*"
+          ],
+          "weight": 1
+        }
+      ],
+      "network_config": {
+        "base_url": "https://api.enmaas.devshift.net"
+      },
+      "concurrency_and_buffer_size": {
+        "concurrency": 16,
+        "buffer_size": 16
+      },
       "custom_provider_config": {
         "base_provider_type": "openai",
         "allowed_requests": {
           "list_models": true,
           "chat_completion": true,
           "chat_completion_stream": true,
+          "responses": true,
+          "responses_stream": true,
+          "count_tokens": true
+        }
+      }
+    },
+    "enmaas-anthropic": {
+      "keys": [
+        {
+          "name": "enmaas-anthropic",
+          "value": "env.ENMAAS_KEY",
+          "models": [
+            "*"
+          ],
+          "weight": 1
+        }
+      ],
+      "network_config": {
+        "base_url": "https://api.enmaas.devshift.net"
+      },
+      "concurrency_and_buffer_size": {
+        "concurrency": 16,
+        "buffer_size": 16
+      },
+      "custom_provider_config": {
+        "base_provider_type": "anthropic",
+        "allowed_requests": {
+          "list_models": true,
           "responses": true,
           "responses_stream": true,
           "count_tokens": true

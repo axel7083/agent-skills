@@ -177,16 +177,17 @@ The server, Bifrost, Postgres and the edge run in one OpenShift project
 ## Not verified yet
 
 Checked so far:
-- the server against a live Bifrost (the same image digest): key creation, price overrides,
-  model allow-list, disabling, deletion;
+- the server against a live Bifrost (the same image digest) and the real LLM endpoint: key
+  creation on both providers, price overrides, model allow-list, provider isolation, disabling,
+  usage, deletion;
 - Harbor 0.26.0 with the Podman environment and the agents' artifacts (`nop` agent);
 - every oracle against the graders.
 
 Still to confirm on the first real run:
-- [ ] The model list of the LLM endpoint, and whether it serves Anthropic Messages natively (Claude
-      Code) or Bifrost translates.
-- [ ] Each harness through the gateway: Claude Code (`/llm/anthropic`), Codex (`/llm/v1/responses`),
-      opencode (`/llm/v1/chat/completions`), and that the model names `enmaas/<model>` route.
+- [ ] Each harness end to end through the gateway. The API paths themselves are checked against
+      the real endpoint through Bifrost: Anthropic Messages natively on the `enmaas-anthropic`
+      provider (Claude models aren't listed by `/v1/models` but answer), chat completions and
+      Responses on `enmaas`, model allow-list and provider isolation, usage charged to the key.
 - [ ] Harbor `--skill` on each harness in the Podman environment, and that the trigger detection
       finds the skill's reads in each harness's trajectory.
 - [ ] Nested Podman in Harbor's privileged container on GitHub's rootless Podman.
