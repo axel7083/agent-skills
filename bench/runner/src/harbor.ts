@@ -21,7 +21,7 @@ import { join } from "node:path";
 import type { Harness, MintedKey, Shard } from "@podman-desktop/agent-skills-bench-server-client";
 import { parse } from "yaml";
 import { z } from "zod";
-import { REPO_ROOT, SANDBOX_LOCK } from "./paths.ts";
+import { REPO_ROOT, SANDBOX_CONTAINERFILE } from "./paths.ts";
 import type { Task } from "./tasks.ts";
 
 const HarnessVersions = z.record(z.string(), z.string().regex(/^\d+\.\d+\.\d+$/));
@@ -33,10 +33,13 @@ export function harnessVersion(harness: Harness): string {
   return version;
 }
 
-/** The sandbox image, pinned by digest: Fedora with a nested Podman for the agent. */
-export function sandboxImage(): string {
-  const image = readFileSync(SANDBOX_LOCK, "utf8").trim();
-  if (!/^[a-z0-9./-]+(:[\w.-]+)?@sha256:[0-9a-f]{64}$/.test(image)) throw new Error(`${SANDBOX_LOCK}: expected an image pinned by digest`);
+/** The sandbox image, pinned by digest: the FROM line of bench/sandbox/task.Containerfile. */
+export function sandboxImage(containerfile: string = readFileSync(SANDBOX_CONTAINERFILE, "utf8")): string {
+  const image = /^FROM\s+(\S+)\s*$/m.exec(containerfile)?.[1];
+  if (image === undefined || !/^[a-z0-9./-]+(:[\w.-]+)?@sha256:[0-9a-f]{64}$/.test(image)) {
+    throw new Error(`${SANDBOX_CONTAINERFILE}: expected one FROM line with an image pinned by digest`);
+  }
+  if (/@sha256:0{64}$/.test(image)) throw new Error(`${SANDBOX_CONTAINERFILE}: the sandbox image isn't published yet (run bench-sandbox.yml)`);
   return image;
 }
 

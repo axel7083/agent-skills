@@ -21,7 +21,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { MintedKey, Shard } from "@podman-desktop/agent-skills-bench-server-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { agentArgs, harborEnvironment, skillArgs } from "../src/harbor.ts";
+import { agentArgs, harborEnvironment, sandboxImage, skillArgs } from "../src/harbor.ts";
 import { readTrial } from "../src/trajectory.ts";
 
 const key: MintedKey = {
@@ -93,5 +93,18 @@ describe("readTrial", () => {
     expect(record.agentSeconds).toBe(90);
     expect(readTrial(dir, "another-skill").agentReported.triggered).toBe(false);
     expect(JSON.parse(readFileSync(join(dir, "result.json"), "utf8"))).toBeDefined();
+  });
+});
+
+describe("sandboxImage", () => {
+  const digest = "a".repeat(64);
+
+  it("reads the FROM line, pinned by digest", () => {
+    expect(sandboxImage(`# comment\nFROM ghcr.io/o/r/bench-sandbox:main@sha256:${digest}\n`)).toBe(`ghcr.io/o/r/bench-sandbox:main@sha256:${digest}`);
+  });
+
+  it("refuses a tag alone, and the placeholder digest", () => {
+    expect(() => sandboxImage("FROM ghcr.io/o/r/bench-sandbox:main\n")).toThrow(/pinned by digest/);
+    expect(() => sandboxImage(`FROM ghcr.io/o/r/bench-sandbox:main@sha256:${"0".repeat(64)}\n`)).toThrow(/isn't published yet/);
   });
 });

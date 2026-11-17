@@ -18,12 +18,15 @@
 
 name: bench-sandbox
 
-# Publishes the image agents work in. Pin the digest it prints in bench/sandbox/image.lock: runs use
-# that digest, never a tag.
+# Publishes the image agents work in as `:main`. Dependabot then proposes its digest in
+# bench/sandbox/task.Containerfile, which runs use: a digest, never a tag. That file is not a trigger:
+# a digest bump must not rebuild the image (and produce yet another digest).
 on:
   push:
     branches: [main]
-    paths: [bench/sandbox/**]
+    paths:
+      - bench/sandbox/**
+      - "!bench/sandbox/task.Containerfile"
   workflow_dispatch:
 
 permissions: {}
@@ -47,7 +50,7 @@ jobs:
         uses: redhat-actions/buildah-build@719e3c40d8af9790c23eca13f7daa339f2867034 # v3.1.0
         with:
           image: bench-sandbox
-          tags: sha-${{ github.sha }}
+          tags: main sha-${{ github.sha }}
           containerfiles: bench/sandbox/Containerfile
           context: bench/sandbox
           # Docker format: OCI images drop HEALTHCHECK.
@@ -67,4 +70,4 @@ jobs:
           IMAGE: ${{ steps.registry.outputs.registry }}/bench-sandbox
           DIGEST: ${{ steps.push.outputs.digest }}
         run: |
-          echo "Pin in bench/sandbox/image.lock: \`$IMAGE@$DIGEST\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Pushed \`$IMAGE:main@$DIGEST\`: Dependabot proposes it in bench/sandbox/task.Containerfile." >> "$GITHUB_STEP_SUMMARY"

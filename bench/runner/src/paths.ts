@@ -23,4 +23,5 @@ export const REPO_ROOT = join(import.meta.dirname, "..", "..", "..");
 export const TASKS_DIR = join(REPO_ROOT, "bench", "tasks");
 export const EVALS_DIR = join(REPO_ROOT, "bench", "evals");
 export const SKILLS_DIR = join(REPO_ROOT, "skills");
-export const SANDBOX_LOCK = join(REPO_ROOT, "bench", "sandbox", "image.lock");
+/** One FROM line: the sandbox image, pinned by digest, kept current by Dependabot. */
+export const SANDBOX_CONTAINERFILE = join(REPO_ROOT, "bench", "sandbox", "task.Containerfile");

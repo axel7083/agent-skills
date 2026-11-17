@@ -143,7 +143,8 @@ node --conditions=@podman-desktop/agent-skills-source bench/runner/src/cli.ts or
 
 ## Running a benchmark
 
-1. Publish the sandbox image (`bench-sandbox.yml`) and pin its digest in `bench/sandbox/image.lock`.
+1. Publish the sandbox image (`bench-sandbox.yml`, `:main`). Its digest lives in
+   `bench/sandbox/task.Containerfile`, which Dependabot keeps current; set it by hand the first time.
 2. Dispatch `bench.yml` from main with the skill, the cells
    (`[{"harness":"opencode","model":"gpt-oss-120b"}]`), trials per task (5) and the run's cap.
 3. The `complete` job's summary links the report.
