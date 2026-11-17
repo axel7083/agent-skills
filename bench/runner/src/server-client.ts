@@ -10,7 +10,11 @@ import { oidcToken } from "./github.ts";
 
 /** The bench server, called with a fresh OIDC token each time (the server accepts them 10 minutes). */
 export class ServerClient {
-  constructor(private readonly baseUrl: string) {}
+  private readonly baseUrl: string;
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+  }
 
   createRun(request: CreateRunRequest): Promise<CreateRunResponse> {
     return this.call("POST", "/v1/runs", CreateRunResponse, request);

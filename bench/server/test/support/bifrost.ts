@@ -28,7 +28,7 @@ interface FakeKey {
 /** Bifrost's governance API, in memory: enough of it for the server's key lifecycle. */
 export class FakeBifrost {
   readonly keys = new Map<string, FakeKey>();
-  readonly overrides = new Map<string, { id: string; pattern: string; patch: unknown }>();
+  readonly overrides = new Map<string, { id: string; pattern: string; pricing_patch: string }>();
   readonly server: SetupServer;
   private next = 0;
 
@@ -70,7 +70,8 @@ export class FakeBifrost {
       http.get(`${base}/pricing-overrides`, () => HttpResponse.json({ pricing_overrides: this.overrides.size === 0 ? null : [...this.overrides.values()] })),
       http.post(`${base}/pricing-overrides`, async ({ request }) => {
         const body = OverrideBody.parse(await request.json());
-        this.overrides.set(body.pattern, { id: `po-${body.pattern}`, pattern: body.pattern, patch: body.patch });
+        // Bifrost stores the patch as a JSON string.
+        this.overrides.set(body.pattern, { id: `po-${body.pattern}`, pattern: body.pattern, pricing_patch: JSON.stringify(body.patch) });
         return HttpResponse.json({});
       }),
     );

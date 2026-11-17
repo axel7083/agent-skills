@@ -11,9 +11,11 @@ const KeyUsage = z.object({
     rate_limit: z.object({ token_current_usage: z.coerce.number().optional() }).nullish(),
   }),
 });
-/** An empty list comes back as `null` (Go's nil slice). */
+/** An empty list comes back as `null` (Go's nil slice). The stored patch is a JSON string, `pricing_patch`. */
 const Overrides = z.object({
-  pricing_overrides: z.array(z.object({ id: z.string().optional(), pattern: z.string().optional(), patch: z.unknown() })).nullish(),
+  pricing_overrides: z
+    .array(z.object({ id: z.string().optional(), pattern: z.string().optional(), pricing_patch: z.string().optional(), patch: z.unknown().optional() }))
+    .nullish(),
 });
 const StoredPatch = z.record(z.string(), z.unknown());
 const Ignored = z.unknown();
@@ -110,7 +112,7 @@ export class BifrostClient {
     const listed = await this.request("list price overrides", "GET", `/api/governance/pricing-overrides?${query.toString()}`, Overrides);
     const existing = new Map<string, { readonly id: string | undefined; readonly patch: unknown }>();
     for (const override of listed.pricing_overrides ?? []) {
-      if (override.pattern !== undefined) existing.set(override.pattern, { id: override.id, patch: override.patch });
+      if (override.pattern !== undefined) existing.set(override.pattern, { id: override.id, patch: storedPatch(override.pricing_patch) ?? override.patch });
     }
     for (const model of models) {
       const patch = this.prices.patch(model);
@@ -154,6 +156,16 @@ export class BifrostClient {
     const parsed = schema.safeParse(json);
     if (!parsed.success) throw new UpstreamError("bifrost", `${action}: unexpected response`, response.status);
     return parsed.data;
+  }
+}
+
+function storedPatch(text: string | undefined): unknown {
+  if (text === undefined) return undefined;
+  try {
+    const value: unknown = JSON.parse(text);
+    return value;
+  } catch {
+    return undefined;
   }
 }
 
