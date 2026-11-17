@@ -69,7 +69,8 @@ describe("the generated client", () => {
       });
     }
     const { data: completion } = await completeRun({ client: clientFor("upload"), path: { run: created.runId }, throwOnError: true });
-    expect(completion.summaryMarkdown).toContain("✅ Helps");
+    // 2 tasks × 2 trials: a Δ, but too little data for a verdict.
+    expect(completion.summaryMarkdown).toContain("Not enough data");
   });
 
   it("refuses a request that doesn't match the document before sending it", async () => {

@@ -97,13 +97,15 @@ describe("a benchmark run, end to end", () => {
     expect(completed.statusCode, completed.body).toBe(200);
     const completion = CompleteRunResponse.parse(completed.json());
     expect(completion.reportUrl).toBe(`https://bench.test/runs/${runId}`);
-    expect(completion.summaryMarkdown).toContain("✅ Helps");
+    // 2 tasks × 2 trials: a Δ, but too little data for a verdict.
+    expect(completion.summaryMarkdown).toContain("Not enough data");
     expect(completion.summaryMarkdown).not.toContain("<script>");
     // Every key was settled, then removed from Bifrost.
     expect([...bifrost.keys.values()].filter((key) => key.name.startsWith(`bench-${String(githubRun)}-`))).toEqual([]);
 
     const results = Results.parse((await call("GET", `/api/v1/runs/${runId}/results`)).json());
-    expect(results.models[0]?.verdict).toBe("helps");
+    expect(results.models[0]?.verdict).toBeNull();
+    expect(results.models[0]?.delta.target?.estimate).toBe(1);
     expect(results.overall.costUsd).toBeCloseTo(0.4);
 
     const trialsResponse = await call("GET", `/api/v1/runs/${runId}/trials`);

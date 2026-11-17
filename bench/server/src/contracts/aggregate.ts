@@ -98,8 +98,21 @@ function clusters(
   return [...byKey.values()];
 }
 
-function verdictOf(interval: { low: number; high: number } | null): Verdict | null {
-  if (interval === null) return null;
+/**
+ * Below these, a bootstrap interval says nothing: with one task (one cluster) and equal scores
+ * within each arm, it collapses to a point, and a point above zero would read "helps".
+ */
+export const MIN_TASKS_FOR_VERDICT = 3;
+export const MIN_TRIALS_FOR_VERDICT = 3;
+
+/** Enough paired data for a verdict: tasks with both arms, each arm with enough trials. */
+function enoughForVerdict(clusters: readonly PairedCluster[]): boolean {
+  const paired = clusters.filter((cluster) => cluster.with.length > 0 && cluster.without.length > 0);
+  return paired.length >= MIN_TASKS_FOR_VERDICT && paired.every((cluster) => Math.min(cluster.with.length, cluster.without.length) >= MIN_TRIALS_FOR_VERDICT);
+}
+
+function verdictOf(interval: { low: number; high: number } | null, enough: boolean): Verdict | null {
+  if (interval === null || !enough) return null;
   if (interval.low > 0) return "helps";
   if (interval.high < 0) return "hurts";
   return "no-effect";
@@ -133,10 +146,9 @@ function modelResult(
   const after = summarize(withSkill, spec, true);
   const byTask = (trial: PublishedTrial): string => trial.task;
 
-  const target = bootstrapPairedDelta(
-    clusters(trials, byTask, (trial) => checkScore(trial, spec.targets)),
-    bootstrap,
-  );
+  const targetClusters = clusters(trials, byTask, (trial) => checkScore(trial, spec.targets));
+  const target = bootstrapPairedDelta(targetClusters, bootstrap);
+  const enough = enoughForVerdict(targetClusters);
   const control =
     spec.controls.length === 0
       ? null
@@ -200,8 +212,8 @@ function modelResult(
       turns: after.turns - before.turns,
       seconds: after.seconds - before.seconds,
     },
-    verdict: verdictOf(target),
-    regression: (control !== null && control.high < 0) || (works !== null && works.high < 0),
+    verdict: verdictOf(target, enough),
+    regression: enough && ((control !== null && control.high < 0) || (works !== null && works.high < 0)),
     trigger,
     checks,
     tasks,

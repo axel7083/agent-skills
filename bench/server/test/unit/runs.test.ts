@@ -45,7 +45,8 @@ describe("summaryMarkdown", () => {
     );
     const results = aggregate({ spec: runRequest.spec, skillSha: SHA, skillVersion: "0.1.0", trials, costUsd: 0.08, maxUsd: 4, checkTitles: {} });
     const markdown = summaryMarkdown(results, "https://bench.test/runs/x");
-    expect(markdown).toContain("| `gpt-oss-120b` · opencode | ✅ Helps | 0% → 100% |");
+    // 2 tasks × 2 trials: below the verdict's minimum.
+    expect(markdown).toContain("| `gpt-oss-120b` · opencode | … Not enough data | 0% → 100% |");
     expect(markdown).toContain("[full report](https://bench.test/runs/x)");
     expect(markdown).not.toContain("script");
   });

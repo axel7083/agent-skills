@@ -95,4 +95,26 @@ describe("aggregate", () => {
     expect(modelB?.tasks[0]?.checks["healthcheck"]).toBe(1);
     expect(modelB?.tasks[0]?.checks["digest"]).toBe(0);
   });
+
+  it("gives no verdict on too little data: one task with equal scores collapses the interval to a point", () => {
+    const oneTask = run(grid(2, [
+      { arm: "without", target: [false, true] },
+      { arm: "with", target: [true, true] },
+    ], ["task-a"]));
+    expect(oneTask.models[0]?.delta.target).toEqual({ estimate: 0.5, low: 0.5, high: 0.5 });
+    expect(oneTask.models[0]?.verdict).toBeNull();
+    expect(oneTask.overall.verdicts).toEqual({ helps: 0, noEffect: 0, hurts: 0 });
+
+    const fewTrials = run(grid(2, [
+      { arm: "without", target: [false, false] },
+      { arm: "with", target: [true, true] },
+    ]));
+    expect(fewTrials.models[0]?.verdict).toBeNull();
+
+    const enough = run(grid(3, [
+      { arm: "without", target: [false, false] },
+      { arm: "with", target: [true, true] },
+    ]));
+    expect(enough.models[0]?.verdict).toBe("helps");
+  });
 });
