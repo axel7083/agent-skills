@@ -18,7 +18,8 @@
 
 name: bench-server
 
-# Publishes the bench server's image. Pin the digest it prints in bench/deploy/openshift/kustomization.yaml.
+# Publishes the bench server's image as `:main`. The cluster's bench-server ImageStream imports it on
+# its own schedule and rolls the server out (bench/deploy/openshift/server-imagestream.yaml).
 on:
   push:
     branches: [main]
@@ -46,7 +47,7 @@ jobs:
         uses: redhat-actions/buildah-build@719e3c40d8af9790c23eca13f7daa339f2867034 # v3.1.0
         with:
           image: bench-server
-          tags: sha-${{ github.sha }}
+          tags: main sha-${{ github.sha }}
           containerfiles: bench/server/Containerfile
           context: .
           # Docker format: OCI images drop HEALTHCHECK.
@@ -68,4 +69,4 @@ jobs:
           IMAGE: ${{ steps.registry.outputs.registry }}/bench-server
           DIGEST: ${{ steps.push.outputs.digest }}
         run: |
-          echo "Pin in bench/deploy/openshift/kustomization.yaml: \`$IMAGE@$DIGEST\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Pushed \`$IMAGE:main@$DIGEST\`: the cluster imports it and rolls the server out." >> "$GITHUB_STEP_SUMMARY"

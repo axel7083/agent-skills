@@ -153,28 +153,26 @@ Before the first run, start with one cheap cell, one task and two trials (`max-u
 
 ## Deploying
 
-The server, Bifrost, Postgres and the edge run in one OpenShift namespace.
+The server, Bifrost, Postgres and the edge run in one OpenShift project
+(`prod-podman-desktop-agent-skills-bench` on the OSPO cluster; the route's host is in
+`bench/deploy/openshift/server.env`).
 
-1. Publish the server image (`bench-server.yml`) and pin its digest in
-   `bench/deploy/openshift/kustomization.yaml`.
-2. Fill `bench/deploy/openshift/prices.json` with the USD price per token of every model a run may
+1. Fill `bench/deploy/openshift/prices.json` with the USD price per token of every model a run may
    use (`{"<model>": {"input": …, "output": …, "cacheRead": …}}`): the server refuses others.
-3. Create the secrets, values never on the command line:
+2. Secrets, generated once and kept; the upstream LLM key from `ENMAAS_KEY` or a silent prompt:
    ```sh
-   oc create secret generic bench-postgres -n <ns> \
-     --from-literal=bench-password="$(openssl rand -hex 24)" \
-     --from-literal=bifrost-password="$(openssl rand -hex 24)"
-   oc create secret generic bench-bifrost -n <ns> \
-     --from-literal=admin-password="$(openssl rand -hex 24)" \
-     --from-literal=encryption-key="$(openssl rand -hex 32)" \
-     --from-file=upstream-key=/dev/stdin <<<"$ENMAAS_KEY"
+   BENCH_NAMESPACE=prod-podman-desktop-agent-skills-bench bench/deploy/openshift/scripts/provision-secrets.sh
    ```
-4. `oc apply -k bench/deploy/openshift -n <ns>` (with `--load-restrictor LoadRestrictionsNone` for
-   `kubectl kustomize`), then set `PUBLIC_URL` and `BIFROST_PUBLIC_URL` in `server.env` to the
-   route's host and apply again.
-5. In the repository's settings: the variable `BENCH_SERVER_URL`, and three environments,
-   `bench-plan`, `bench-agent` and `bench-upload`, each limited to the `main` branch. Main must be
-   protected (`REQUIRE_PROTECTED_REF`).
+3. Deploy a clean checkout of main:
+   ```sh
+   BENCH_NAMESPACE=prod-podman-desktop-agent-skills-bench bench/deploy/openshift/scripts/deploy.sh
+   ```
+   The server image follows main: `bench-server.yml` pushes `:main`, the `bench-server` ImageStream
+   imports it about every 15 minutes and rolls the server out. `deploy.sh` applies the digest the
+   ImageStream holds.
+4. In the repository's settings: the variable `BENCH_SERVER_URL` (the route), and three
+   environments, `bench-plan`, `bench-agent` and `bench-upload`, each limited to `main`. Main must
+   be protected (`REQUIRE_PROTECTED_REF`).
 
 ## Not verified yet
 

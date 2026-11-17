@@ -19,4 +19,4 @@
 # The sandbox every trial runs in, pinned by digest. bench-sandbox.yml pushes `:main` on each change
 # to bench/sandbox; Dependabot (docker ecosystem) then proposes the new digest here. The runner reads
 # this FROM line and adds the task's app on top of it.
-FROM ghcr.io/axel7083/agent-skills/bench-sandbox:main@sha256:0000000000000000000000000000000000000000000000000000000000000000
+FROM ghcr.io/axel7083/agent-skills/bench-sandbox:main@sha256:67d2d6559dcaca294f12011d47d0f7dccdb12ab549e802c280e90f60c9fde399

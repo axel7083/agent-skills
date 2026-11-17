@@ -39,6 +39,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bench-server
+  annotations:
+    # A new digest in the bench-server ImageStream rolls the server out.
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"bench-server:main"},"fieldPath":"spec.template.spec.containers[?(@.name==\"server\")].image"}]'
 spec:
   # One instance: the sweeper and the per-run locks assume it (Postgres advisory locks cover restarts).
   replicas: 1
@@ -62,7 +65,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: server
-          image: ghcr.io/axel7083/agent-skills/bench-server
+          # deploy.sh replaces it with the digest the ImageStream imported.
+          image: ghcr.io/axel7083/agent-skills/bench-server:main
           ports:
             - name: http
               containerPort: 8080
@@ -70,14 +74,19 @@ spec:
             - configMapRef:
                 name: bench-server-env
           env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: bench-postgres
                   key: bench-password
-            # TLS to Postgres, its certificate checked against OpenShift's service CA.
+            # TLS to Postgres, its certificate checked against OpenShift's service CA: the full service
+            # name is the one the serving certificate carries.
             - name: DATABASE_URL
-              value: postgres://bench:$(DB_PASSWORD)@bench-postgres:5432/bench?sslmode=verify-full&sslrootcert=/etc/bench-ca/service-ca.crt
+              value: postgres://bench:$(DB_PASSWORD)@bench-postgres.$(POD_NAMESPACE).svc:5432/bench?sslmode=verify-full&sslrootcert=/etc/bench-ca/service-ca.crt
             - name: BIFROST_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
