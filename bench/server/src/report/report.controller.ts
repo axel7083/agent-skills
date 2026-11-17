@@ -1,0 +1,24 @@
+import { Controller, Get, Header, Param, ParseUUIDPipe, UseGuards } from "@nestjs/common";
+import { ThrottlerGuard } from "@nestjs/throttler";
+import { CONTENT_SECURITY_POLICY, renderReportHtml } from "@podman-desktop/bench-report";
+import { RunsService } from "../runs/runs.service.ts";
+
+/** Where the report's bundled script and stylesheet are served (main.ts). */
+export const ASSETS_PREFIX = "/assets";
+
+@Controller("runs")
+@UseGuards(ThrottlerGuard)
+export class ReportController {
+  constructor(private readonly runs: RunsService) {}
+
+  @Get(":run")
+  @Header("content-type", "text/html; charset=utf-8")
+  @Header("content-security-policy", `${CONTENT_SECURITY_POLICY}; frame-ancestors 'none'`)
+  @Header("x-content-type-options", "nosniff")
+  @Header("referrer-policy", "no-referrer")
+  @Header("cache-control", "public, max-age=300")
+  async report(@Param("run", new ParseUUIDPipe()) run: string): Promise<string> {
+    const [results, trials] = await Promise.all([this.runs.results(run), this.runs.trials(run)]);
+    return renderReportHtml({ results, trials, scriptUrl: `${ASSETS_PREFIX}/report.js`, styleUrl: `${ASSETS_PREFIX}/report.css` });
+  }
+}

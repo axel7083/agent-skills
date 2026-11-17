@@ -5,7 +5,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
-import { EvalSpec, PublishedTrial, Results, Trial } from "../src/index.ts";
+import { EvalSpec, PublishedTrial, Results, RunDetail, RunSummary, Trial } from "../src/index.ts";
 
 const outDir = join(import.meta.dirname, "..", "schemas");
 
@@ -14,6 +14,8 @@ const schemas: Readonly<Record<string, z.ZodType>> = {
   "published-trial": PublishedTrial,
   results: Results,
   eval: EvalSpec,
+  run: RunDetail,
+  "run-summary": RunSummary,
 };
 
 await mkdir(outDir, { recursive: true });

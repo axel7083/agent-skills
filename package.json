@@ -20,10 +20,12 @@
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
+    "@swc/core": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
+    "unplugin-swc": "catalog:",
     "vitest": "catalog:"
   }
 }

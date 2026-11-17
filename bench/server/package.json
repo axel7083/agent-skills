@@ -1,0 +1,47 @@
+{
+  "name": "@podman-desktop/bench-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The benchmark server: runs, budget-capped LLM keys, trials, statistics, the report and the raw-data API",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/main.js",
+  "files": [
+    "dist",
+    "drizzle"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node --enable-source-maps dist/main.js",
+    "db:generate": "drizzle-kit generate",
+    "db:check": "drizzle-kit check"
+  },
+  "dependencies": {
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/drizzle": "catalog:",
+    "@nestjs/platform-node": "catalog:",
+    "@nestjs/schedule": "catalog:",
+    "@nestjs/throttler": "catalog:",
+    "@podman-desktop/bench-contracts": "workspace:*",
+    "@podman-desktop/bench-report": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "jose": "catalog:",
+    "nestjs-pino": "catalog:",
+    "p-retry": "catalog:",
+    "pg": "catalog:",
+    "pino": "catalog:",
+    "pino-http": "catalog:",
+    "reflect-metadata": "catalog:",
+    "rxjs": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "catalog:",
+    "@testcontainers/postgresql": "catalog:",
+    "@types/pg": "catalog:",
+    "drizzle-kit": "catalog:",
+    "msw": "catalog:"
+  }
+}
