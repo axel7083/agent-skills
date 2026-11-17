@@ -53,6 +53,12 @@ export class PriceList {
     return models.filter((model) => !Object.hasOwn(this.prices, model));
   }
 
+  /** A model's relative cost, to share a budget between models: its input plus output list price. */
+  weight(model: string): number {
+    const price = Object.hasOwn(this.prices, model) ? this.prices[model] : undefined;
+    return price === undefined ? 0 : price.input + price.output;
+  }
+
   patch(model: string): PricePatch | undefined {
     const price = Object.hasOwn(this.prices, model) ? this.prices[model] : undefined;
     if (price === undefined) return undefined;

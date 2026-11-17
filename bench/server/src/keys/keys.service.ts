@@ -28,6 +28,7 @@ import type { Db } from "../db/db.module.ts";
 import { keys, runs, shards } from "../db/schema.ts";
 import type { Principal } from "../auth/oidc-verifier.ts";
 import { BifrostClient } from "./bifrost.client.ts";
+import { PriceList } from "./prices.ts";
 
 /** The smallest key worth minting. */
 const MIN_KEY_USD = 0.05;
@@ -49,6 +50,7 @@ export class KeysService {
     @InjectDrizzle() private readonly db: Db,
     @Inject(APP_ENV) private readonly env: AppEnv,
     private readonly bifrost: BifrostClient,
+    private readonly prices: PriceList,
     private readonly clock: Clock,
   ) {}
 
@@ -68,13 +70,13 @@ export class KeysService {
       if (existing !== undefined) throw new Conflict(`shard ${shardId} already has a key for attempt ${String(principal.runAttempt)}`);
 
       const now = this.clock.now();
-      const [counted] = await tx.select({ count: sql<number>`count(*)::int` }).from(shards).where(eq(shards.runId, runId));
-      const shardCount = counted?.count ?? 1;
+      const runShards = await tx.select({ model: shards.model }).from(shards).where(eq(shards.runId, runId));
       const runCommitted = await committed(tx, eq(keys.runId, runId));
       const dayCommitted = await committed(tx, gt(keys.createdAt, new Date(now.getTime() - 24 * 3_600_000)));
       const limitUsd = roundCents(
-        // Shards run in parallel: each gets its even share of the cap. A re-run's key gets what settled keys left over.
-        Math.min(run.maxUsd - runCommitted, run.maxUsd / Math.max(1, shardCount), this.env.DAILY_USD - dayCommitted),
+        // Shards run in parallel: each gets its share of the cap, weighted by its model's price. A re-run's
+        // key gets what settled keys left over.
+        Math.min(run.maxUsd - runCommitted, run.maxUsd * shareOf(shard.model, runShards, this.prices), this.env.DAILY_USD - dayCommitted),
       );
       if (limitUsd < MIN_KEY_USD) throw new BudgetExceeded(`run ${runId} has $${limitUsd.toFixed(2)} left`);
 
@@ -179,6 +181,16 @@ async function committed(tx: Tx | Db, where: ReturnType<typeof eq>): Promise<num
     .from(keys)
     .where(where);
   return row?.usd ?? 0;
+}
+
+/**
+ * A shard's share of its run's cap: its model's list price (input + output, per token) over the sum
+ * for every shard of the run. A model ten times dearer gets ten times the budget for the same trials;
+ * a run on one model splits its cap evenly.
+ */
+export function shareOf(model: string, runShards: readonly { readonly model: string }[], prices: PriceList): number {
+  const total = runShards.reduce((sum, other) => sum + prices.weight(other.model), 0);
+  return total > 0 ? prices.weight(model) / total : 1 / Math.max(1, runShards.length);
 }
 
 function roundCents(usd: number): number {

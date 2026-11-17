@@ -18,6 +18,8 @@
 
 import { aggregate, type PublishedTrial } from "../../src/contracts/index.ts";
 import { describe, expect, it } from "vitest";
+import { shareOf } from "../../src/keys/keys.service.ts";
+import { PriceList } from "../../src/keys/prices.ts";
 import { expand } from "../../src/runs/runs.service.ts";
 import { summaryMarkdown } from "../../src/runs/summary.ts";
 import { runRequest, SHA, trialFor } from "../integration/fixtures.ts";
@@ -46,5 +48,19 @@ describe("summaryMarkdown", () => {
     expect(markdown).toContain("| `gpt-oss-120b` · opencode | ✅ Helps | 0% → 100% |");
     expect(markdown).toContain("[full report](https://bench.test/runs/x)");
     expect(markdown).not.toContain("script");
+  });
+});
+
+describe("shareOf", () => {
+  const prices = new PriceList({ dear: { input: 4e-6, output: 2e-5 }, cheap: { input: 1e-7, output: 5e-7 } });
+
+  it("weights each shard's share of the run by its model's price", () => {
+    const shards = [{ model: "dear" }, { model: "dear" }, { model: "cheap" }, { model: "cheap" }];
+    expect(shareOf("dear", shards, prices) * 2 + shareOf("cheap", shards, prices) * 2).toBeCloseTo(1);
+    expect(shareOf("dear", shards, prices) / shareOf("cheap", shards, prices)).toBeCloseTo(40);
+  });
+
+  it("splits evenly on one model", () => {
+    expect(shareOf("cheap", [{ model: "cheap" }, { model: "cheap" }, { model: "cheap" }], prices)).toBeCloseTo(1 / 3);
   });
 });
