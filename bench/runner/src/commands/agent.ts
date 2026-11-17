@@ -111,6 +111,9 @@ export async function agent(options: AgentOptions): Promise<void> {
     writeFileSync(join(target, "result.json"), JSON.stringify(kept, null, 2));
     const trajectory = join(source, "agent", "trajectory.json");
     if (existsSync(trajectory)) cpSync(trajectory, join(target, "trajectory.json"));
+    const installed = installedSkills(join(source, "agent"), allSkills);
+    writeFileSync(join(target, "skills.json"), JSON.stringify({ installed }, null, 2));
+    console.log(`trial ${String(index)}: skills installed: ${installed === null ? "not visible for this harness" : installed.join(", ") || "none"}`);
     const app = join(source, "artifacts", "app");
     if (existsSync(app)) cpSync(app, join(target, "app"), { recursive: true });
   });
@@ -130,4 +133,19 @@ function redact(dir: string, secret: string): void {
     const text = readFileSync(path, "latin1");
     if (text.includes(secret)) writeFileSync(path, text.replaceAll(secret, "[REDACTED]"), "latin1");
   }
+}
+
+/**
+ * The skills the harness had installed, as far as its logs show: Claude Code's skills directory
+ * (Harbor mounts it under the trial's agent logs), or a system step of the trajectory listing them
+ * (Codex). Null when neither is there: it can't be told apart from "none" for that harness.
+ */
+function installedSkills(agentDir: string, candidates: readonly string[]): string[] | null {
+  const claudeSkills = join(agentDir, "sessions", "skills");
+  if (existsSync(claudeSkills)) return readdirSync(claudeSkills).filter((name) => candidates.includes(name)).sort();
+  const trajectory = join(agentDir, "trajectory.json");
+  if (!existsSync(trajectory)) return null;
+  const text = readFileSync(trajectory, "utf8");
+  if (!text.includes("<skills_instructions>")) return null;
+  return candidates.filter((name) => text.includes(name)).sort();
 }
