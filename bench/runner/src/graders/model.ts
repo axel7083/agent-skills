@@ -25,7 +25,7 @@ export interface RuntimeFacts {
   imageUser?: string;
   imageSizeBytes?: number;
   exposedPorts?: number[];
-  /** In-container users of the running processes (names or uids). */
+  /** In-container UIDs of the running processes. */
   processUsers?: string[];
   canaryInHistory?: boolean;
   canaryInFilesystem?: boolean;

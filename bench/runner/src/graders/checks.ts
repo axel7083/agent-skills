@@ -143,7 +143,7 @@ export const CHECKS: readonly Check[] = [
     evaluate: (context: GradeContext): Result => {
       const users = context.runtime.processUsers;
       if (users !== undefined && users.length > 0) {
-        return users.some((user) => user === "root" || user === "0") ? ["fail", "a process runs as root"] : ["pass", `processes run as ${[...new Set(users)].join(", ")}`];
+        return users.some((user) => user === "root" || user === "0") ? ["fail", "a process runs as root"] : ["pass", `processes run as uid ${[...new Set(users)].join(", ")}`];
       }
       const user = context.runtime.imageUser;
       if (user === undefined) return ["fail", "image not built"];

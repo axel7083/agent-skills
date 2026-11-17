@@ -43,6 +43,7 @@ export interface CompleteOptions {
 export async function complete(options: CompleteOptions): Promise<void> {
   const artifacts = await runArtifacts();
   const server = new ServerClient(options.server);
+  let uploaded = 0;
   const dirs = existsSync(options.input) ? readdirSync(options.input).filter((name) => name.startsWith("graded-")).sort() : [];
   for (const dir of dirs) {
     const path = join(options.input, dir, "trials.json");
@@ -56,8 +57,11 @@ export async function complete(options: CompleteOptions): Promise<void> {
       continue;
     }
     await server.uploadTrials(options.runId, { shard: graded.shard, attempt: graded.attempt, artifactId, trials: graded.trials });
+    uploaded += graded.trials.length;
     console.log(`${graded.shard}: ${String(graded.trials.length)} trials uploaded`);
   }
+  // Nothing graded: no result to publish. The run's keys are settled by the server's sweeper.
+  if (uploaded === 0) throw new Error("no graded trial to upload: every agent or grade job failed");
   const completion = await server.complete(options.runId);
   appendSummary(completion.summaryMarkdown);
   console.log(`report: ${completion.reportUrl}`);

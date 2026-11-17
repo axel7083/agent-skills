@@ -99,9 +99,7 @@ function gatewayModel(key: MintedKey, model: string): string {
 /** Harbor's agent arguments for a harness talking to the gateway with the shard's key. */
 export function agentArgs(shard: Shard, key: MintedKey): string[] {
   const model = gatewayModel(key, shard.model);
-  // skip_model_parsing: Harbor would otherwise resolve the name through litellm's provider table; the
-  // gateway's `<provider>/<model>` must reach the CLI unchanged.
-  const version = ["--ak", `version=${harnessVersion(shard.harness)}`, "--ak", "skip_model_parsing=true"];
+  const version = ["--ak", `version=${harnessVersion(shard.harness)}`];
   switch (shard.harness) {
     case "claude-code":
       return [
@@ -113,9 +111,8 @@ export function agentArgs(shard: Shard, key: MintedKey): string[] {
         "--ae",
         `ANTHROPIC_BASE_URL=${key.anthropicBaseUrl}`,
         "--ae",
+        // Bearer token. Not ANTHROPIC_API_KEY, which Harbor reads first: even empty, it would win.
         `ANTHROPIC_AUTH_TOKEN=${key.key}`,
-        "--ae",
-        "ANTHROPIC_API_KEY=",
         // Every model class maps to the shard's model: the key allows that one only.
         "--ae",
         `ANTHROPIC_DEFAULT_OPUS_MODEL=${model}`,

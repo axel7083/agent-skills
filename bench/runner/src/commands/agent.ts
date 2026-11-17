@@ -81,6 +81,9 @@ export async function agent(options: AgentOptions): Promise<void> {
         "--job-name",
         shard.id,
         "--disable-verification",
+        // Harbor would otherwise resolve the model through litellm's provider table: the gateway's
+        // `<provider>/<model>` must reach the agent CLI unchanged.
+        "--skip-model-parsing-and-provider-mapping",
         "--artifact",
         "/app",
         "-y",
@@ -114,6 +117,8 @@ export async function agent(options: AgentOptions): Promise<void> {
   writeFileSync(join(options.out, "shard.json"), JSON.stringify({ shard, trials: trials.length }, null, 2));
   redact(options.out, key.key);
   console.log(`${String(trials.length)} trials collected for ${shard.id}`);
+  // The artifact is still uploaded (the workflow's step runs always): what Harbor left helps debugging.
+  if (trials.length === 0) throw new Error(`Harbor ran no trial for ${shard.id} (exit ${String(harbor.code)})`);
 }
 
 /** The key is revoked already; it still never leaves the runner. */

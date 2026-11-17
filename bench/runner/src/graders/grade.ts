@@ -181,7 +181,8 @@ async function imageGate(spec: TaskSpec, appDir: string, containerfilePath: stri
     // The task forced the user (OpenShift): the running user says nothing about the image's own.
     const forcedUser = (spec.run?.args ?? []).some((arg) => arg === "--user" || arg.startsWith("--user="));
     if (!forcedUser) {
-      const top = await run("podman", ["top", container, "user"]);
+      // In-container UIDs: `user` would resolve names against the host's /etc/passwd.
+      const top = await run("podman", ["top", container, "uid"]);
       if (top.code === 0) runtime.processUsers = top.stdout.split("\n").slice(1).map((line) => line.trim()).filter((line) => line !== "");
     }
     if (spec.openshift !== undefined && answered) {
