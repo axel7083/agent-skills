@@ -1,0 +1,35 @@
+name: bench-server
+
+# Publishes the bench server's image. Pin the digest it prints in bench/deploy/openshift/kustomization.yaml.
+on:
+  push:
+    branches: [main]
+    paths: [bench/server/**, bench/contracts/**, bench/report/**, pnpm-lock.yaml]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: build and push
+        env:
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          image="ghcr.io/${REPOSITORY,,}/bench-server"
+          # docker format: OCI images drop HEALTHCHECK.
+          podman build --format docker --build-arg "REVISION=$SHA" -f bench/server/Containerfile -t "$image:$SHA" .
+          printf '%s' "$REGISTRY_TOKEN" | podman login ghcr.io -u "$REGISTRY_USER" --password-stdin
+          podman push --digestfile digest "$image:$SHA"
+          echo "Pin in bench/deploy/openshift/kustomization.yaml: \`$(cat digest)\`" >> "$GITHUB_STEP_SUMMARY"

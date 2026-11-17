@@ -1,0 +1,33 @@
+# The bench server. Build from the repository root:
+#   podman build -f bench/server/Containerfile -t bench-server .
+# Red Hat's hardened (Hummingbird) Node.js images, pinned by digest; Dependabot bumps them.
+
+FROM quay.io/hummingbird/nodejs:24-builder@sha256:03d02a4ae12e0de51b33fe3233ae35aff07d8d3bb4cef6293c4442e553b917fd AS build
+USER 0
+RUN npm install --global --no-fund --no-audit pnpm@12.18.0
+WORKDIR /src
+# Dependencies first, for layer caching: manifests and the lockfile only.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY bench/contracts/package.json bench/contracts/
+COPY bench/report/package.json bench/report/
+COPY bench/server/package.json bench/server/
+RUN pnpm install --frozen-lockfile --filter @podman-desktop/bench-server...
+COPY bench/contracts bench/contracts
+COPY bench/report bench/report
+COPY bench/server bench/server
+RUN pnpm --filter @podman-desktop/bench-server... run build \
+ && pnpm --filter @podman-desktop/bench-server deploy --prod --legacy /opt/app
+
+FROM quay.io/hummingbird/nodejs:24@sha256:c9640ede7ee86932dfbbbef53a123bcb6c96f0ef51244d38805e426568f9826b
+ARG REVISION=unknown
+LABEL org.opencontainers.image.title="bench-server" \
+      org.opencontainers.image.source="https://github.com/podman-desktop/agent-skills" \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.revision="${REVISION}"
+COPY --from=build --chown=65532:0 /opt/app /opt/app
+WORKDIR /opt/app
+ENV NODE_ENV=production
+USER 65532
+EXPOSE 8080
+HEALTHCHECK CMD ["node", "-e", "fetch('http://127.0.0.1:8080/healthz').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+CMD ["node", "--enable-source-maps", "dist/main.js"]

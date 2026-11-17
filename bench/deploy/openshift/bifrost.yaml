@@ -1,0 +1,121 @@
+# Bifrost: the LLM gateway. It alone holds the upstream key; runs get virtual keys over it, minted
+# by the bench server. Reached by the edge on its inference routes and by the server on its admin API.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bench-bifrost
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bench-bifrost
+spec:
+  selector:
+    app.kubernetes.io/name: bench-bifrost
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bench-bifrost
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  # Spend lives in memory and reaches Postgres every few seconds: never two instances charging the same keys.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bench-bifrost
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bench-bifrost
+        app.kubernetes.io/component: llm-gateway
+    spec:
+      serviceAccountName: bench-bifrost
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bifrost
+          # Same digest as the server's live check (docs/benchmark.md); bump both together.
+          image: docker.io/maximhq/bifrost@sha256:f5b18826349fe9e1c402c10d19f1cbb5567a3c800ad928580d07f72e69106ec7
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: LOG_STYLE
+              value: json
+            - name: BIFROST_ADMIN_USERNAME
+              value: bench
+            - name: BIFROST_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bench-bifrost
+                  key: admin-password
+            - name: BIFROST_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bench-postgres
+                  key: bifrost-password
+            # Without it, virtual keys and the upstream key are stored in plain text in Postgres.
+            - name: BIFROST_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bench-bifrost
+                  key: encryption-key
+            - name: ENMAAS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bench-bifrost
+                  key: upstream-key
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          # Its first boot runs database migrations before it reports healthy.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /app/data/config.json
+              subPath: config.json
+              readOnly: true
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: config
+          configMap:
+            name: bench-bifrost-config
+        # Bifrost wants a writable APP_DIR; what it keeps lives in Postgres.
+        - name: data
+          emptyDir:
+            sizeLimit: 64Mi

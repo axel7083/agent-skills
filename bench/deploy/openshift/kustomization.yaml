@@ -1,0 +1,35 @@
+# The benchmark on OpenShift (docs/benchmark.md "Deploying"): oc apply -k bench/deploy/openshift -n <ns>.
+# Reads ../bifrost/config.json: build with --load-restrictor LoadRestrictionsNone. Secrets are never
+# in this tree.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: agent-skills-bench
+resources:
+  - networkpolicies.yaml
+  - postgres.yaml
+  - bifrost.yaml
+  - server.yaml
+  - edge.yaml
+configMapGenerator:
+  - name: bench-postgres-config
+    files:
+      - postgres/bench.conf
+      - postgres/bench.sh
+  - name: bench-bifrost-config
+    files:
+      - ../bifrost/config.json
+  - name: bench-edge
+    files:
+      - edge/nginx.conf
+  - name: bench-prices
+    files:
+      - prices.json
+  - name: bench-server-env
+    envs:
+      - server.env
+images:
+  # The digest bench-server.yml printed; runs never use a tag.
+  - name: ghcr.io/axel7083/agent-skills/bench-server
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000

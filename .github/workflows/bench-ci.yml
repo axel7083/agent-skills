@@ -1,0 +1,74 @@
+name: bench-ci
+
+# Checks the benchmark's code without any secret or LLM call: safe on pull requests from forks.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: bench-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - name: JSON Schemas are up to date
+        run: |
+          pnpm --filter @podman-desktop/bench-contracts gen
+          git diff --exit-code bench/contracts/schemas
+      - name: migrations match the schema
+        run: pnpm --filter @podman-desktop/bench-server db:check
+      # Integration tests start Postgres with testcontainers, on the runner's rootless Podman.
+      - run: systemctl --user start podman.socket
+      - run: pnpm test
+
+  oracles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: pnpm install --frozen-lockfile --ignore-scripts --filter @podman-desktop/bench-runner...
+      # Every known solution graded as the oracle says: the graders tell good from bad.
+      - run: node --conditions=@podman-desktop/bench-source bench/runner/src/cli.ts oracles
+
+  workflows:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: actionlint
+        run: podman run --rm -v "$PWD:/repo:ro,Z" --workdir /repo docker.io/rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: false
+      - name: zizmor
+        run: uvx zizmor==1.32.0 --offline .github/workflows

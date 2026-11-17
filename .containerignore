@@ -1,0 +1,13 @@
+# Build context of bench/server/Containerfile: the sources it copies, nothing local.
+**/node_modules
+**/dist
+**/coverage
+.git
+.idea
+.vscode
+.env
+.env.*
+bench/tasks
+bench/runner
+bench/sandbox
+skills

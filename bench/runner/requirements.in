@@ -1,0 +1,2 @@
+# The agent runner. `requirements.txt` is compiled from this file with hashes (see its header).
+harbor==0.26.0
