@@ -161,11 +161,11 @@ The server, Bifrost, Postgres and the edge run in one OpenShift project
    use (`{"<model>": {"input": …, "output": …, "cacheRead": …}}`): the server refuses others.
 2. Secrets, generated once and kept; the upstream LLM key from `ENMAAS_KEY` or a silent prompt:
    ```sh
-   BENCH_NAMESPACE=prod-podman-desktop-agent-skills-bench bench/deploy/openshift/scripts/provision-secrets.sh
+   BENCH_CONTEXT=<the project's kubeconfig context> BENCH_NAMESPACE=prod-podman-desktop-agent-skills-bench bench/deploy/openshift/scripts/provision-secrets.sh
    ```
 3. Deploy a clean checkout of main:
    ```sh
-   BENCH_NAMESPACE=prod-podman-desktop-agent-skills-bench bench/deploy/openshift/scripts/deploy.sh
+   BENCH_CONTEXT=<the project's kubeconfig context> BENCH_NAMESPACE=prod-podman-desktop-agent-skills-bench bench/deploy/openshift/scripts/deploy.sh
    ```
    The server image follows main: `bench-server.yml` pushes `:main`, the `bench-server` ImageStream
    imports it about every 15 minutes and rolls the server out. `deploy.sh` applies the digest the

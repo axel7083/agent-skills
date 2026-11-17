@@ -19,12 +19,14 @@
 
 # Deploys this checkout's bench to OpenShift. Run from a machine logged in with oc, after
 # provision-secrets.sh:
-#   BENCH_NAMESPACE=<namespace> bench/deploy/openshift/scripts/deploy.sh
+#   BENCH_CONTEXT=<kubeconfig context> BENCH_NAMESPACE=<namespace> bench/deploy/openshift/scripts/deploy.sh
 # GitHub never holds a credential to the cluster: an operator applies a clean checkout of main
 # (BENCH_DEPLOY_UNMERGED=1 allows another commit).
 set -euo pipefail
 
 NS="${BENCH_NAMESPACE:?set BENCH_NAMESPACE to the target namespace}"
+# The kubeconfig context to use, whatever the current one is (another tool may switch it meanwhile).
+CONTEXT="${BENCH_CONTEXT:-$(command oc config current-context)}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 DIR="$ROOT/bench/deploy/openshift"
 IMAGE=ghcr.io/axel7083/agent-skills/bench-server
@@ -33,10 +35,10 @@ FIELD_MANAGER=bench-deploy
 
 log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 die() { echo "error: $*" >&2; exit 1; }
-oc() { command oc --namespace "$NS" "$@"; }
+oc() { command oc --context "$CONTEXT" --namespace "$NS" "$@"; }
 
 main() {
-  command oc whoami >/dev/null || die "log in with oc first"
+  oc whoami >/dev/null || die "log in with oc first"
 
   log "checkout"
   git -C "$ROOT" diff --quiet HEAD && git -C "$ROOT" diff --cached --quiet && [[ -z "$(git -C "$ROOT" ls-files --others --exclude-standard)" ]] ||
@@ -48,7 +50,8 @@ main() {
     [[ "${BENCH_DEPLOY_UNMERGED:-}" == 1 ]] || die "HEAD ${commit:0:7} is not origin/main (BENCH_DEPLOY_UNMERGED=1 to deploy it anyway)"
     echo "   ${commit:0:7} is not origin/main (BENCH_DEPLOY_UNMERGED=1)"
   fi
-  echo "   ${commit:0:7} → $NS"
+  echo "   ${commit:0:7} → $NS on $(oc whoami --show-server) ($CONTEXT)"
+  oc get "namespace/$NS" >/dev/null 2>&1 || oc get "project/$NS" >/dev/null 2>&1 || die "no namespace $NS on that cluster"
 
   log "prerequisites"
   local object

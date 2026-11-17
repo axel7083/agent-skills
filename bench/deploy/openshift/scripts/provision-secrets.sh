@@ -18,7 +18,7 @@
 #
 
 # Creates the bench's Secrets on OpenShift. Run from a machine logged in with oc:
-#   BENCH_NAMESPACE=<namespace> bench/deploy/openshift/scripts/provision-secrets.sh
+#   BENCH_CONTEXT=<kubeconfig context> BENCH_NAMESPACE=<namespace> bench/deploy/openshift/scripts/provision-secrets.sh
 # Generated once, then kept: the database passwords, Bifrost's admin password and encryption key
 # (Bifrost can't change its encryption key: keep a copy outside the cluster). The upstream LLM key is
 # read from ENMAAS_KEY, or asked for without echo; re-running with it set replaces it. Values never
@@ -26,7 +26,9 @@
 set -euo pipefail
 
 NS="${BENCH_NAMESPACE:?set BENCH_NAMESPACE to the target namespace}"
-oc() { command oc --namespace "$NS" "$@"; }
+# The kubeconfig context to use, whatever the current one is (another tool may switch it meanwhile).
+CONTEXT="${BENCH_CONTEXT:-$(command oc config current-context)}"
+oc() { command oc --context "$CONTEXT" --namespace "$NS" "$@"; }
 
 # A key of an existing Secret, or nothing.
 current() { { oc get secret "$1" -o "jsonpath={.data.$2}" 2>/dev/null || true; } | base64 -d; }
@@ -41,8 +43,8 @@ apply_secret() {
   echo "   secret/$name"
 }
 
-command oc whoami >/dev/null || { echo "log in with oc first" >&2; exit 1; }
-echo "==> secrets in $NS"
+oc whoami >/dev/null || { echo "log in with oc first" >&2; exit 1; }
+echo "==> secrets in $NS on $(oc whoami --show-server) ($CONTEXT)"
 
 bench_password="$(current bench-postgres bench-password)"
 bifrost_db_password="$(current bench-postgres bifrost-password)"
