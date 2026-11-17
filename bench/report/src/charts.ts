@@ -1,0 +1,545 @@
+import type { ModelResult, PublishedTrial, Results } from "@podman-desktop/bench-contracts";
+import type { TopLevelSpec } from "vega-lite";
+import { compact, interval, percent, points, signedNumber, signedPercent, signedUsd, usd } from "./format.ts";
+import { type Theme, vegaConfig } from "./theme.ts";
+
+/** A chart, the one question it answers, and the same numbers as a table (never tooltip-only). */
+export interface ChartView {
+  readonly id: string;
+  readonly question: string;
+  readonly caption: string;
+  readonly spec: TopLevelSpec;
+  readonly table: { readonly columns: readonly string[]; readonly rows: readonly (readonly string[])[] };
+}
+
+const WITHOUT = "Without skill";
+const WITH = "With skill";
+
+export function modelLabel(result: Pick<ModelResult, "model" | "harness">): string {
+  return `${result.model} · ${result.harness}`;
+}
+
+function checkTitle(results: Results, check: string): string {
+  return results.checkTitles[check] ?? check;
+}
+
+function armScale(theme: Theme): { domain: string[]; range: string[] } {
+  return { domain: [WITHOUT, WITH], range: [theme.without, theme.with] };
+}
+
+/** Faceted charts can't fit the container's width: they size from their steps instead. */
+function base(theme: Theme, fit = true): Pick<TopLevelSpec, "$schema" | "config" | "autosize"> {
+  return {
+    $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+    config: vegaConfig(theme),
+    autosize: fit ? { type: "fit-x", contains: "padding" } : { type: "pad" },
+  };
+}
+
+/** ① Each model moves from its *without* point to its *with* point: up is better, left is cheaper. */
+export function heroChart(results: Results, theme: Theme): ChartView {
+  const points_ = results.models.flatMap((result) => [
+    { model: modelLabel(result), arm: WITHOUT, cost: result.without.costUsd, score: result.without.target, tokens: result.without.tokens.median },
+    { model: modelLabel(result), arm: WITH, cost: result.with.costUsd, score: result.with.target, tokens: result.with.tokens.median },
+  ]);
+  const costs = results.models.map((result) => result.with.costUsd).sort((a, b) => a - b);
+  const middle = costs[Math.floor(costs.length / 2)] ?? 0;
+  const labels = results.models.map((result) => ({
+    model: modelLabel(result),
+    cost: result.with.costUsd,
+    score: result.with.target,
+    side: result.with.costUsd > middle ? "left" : "right",
+  }));
+  const moves = results.models.map((result) => ({
+    model: modelLabel(result),
+    x: result.without.costUsd,
+    y: result.without.target,
+    x2: result.with.costUsd,
+    y2: result.with.target,
+  }));
+  const x = {
+    field: "cost",
+    type: "quantitative" as const,
+    scale: { type: "log" as const, zero: false, nice: false, padding: 24 },
+    axis: { format: "$.3~f", title: "Cost per trial (USD, log scale) — left is cheaper", tickCount: 5, grid: false },
+  };
+  const y = {
+    field: "score",
+    type: "quantitative" as const,
+    scale: { domain: [0, 1] },
+    axis: { format: ".0%", title: "Target checks passed — up is better", tickCount: 5 },
+  };
+  const color = { field: "arm", type: "nominal" as const, scale: armScale(theme), legend: { title: null, symbolStrokeWidth: 2 } };
+  const tooltip = [
+    { field: "model", title: "Model" },
+    { field: "arm", title: "Arm" },
+    { field: "score", title: "Target checks", format: ".0%" },
+    { field: "cost", title: "Cost per trial", format: "$.4f" },
+    { field: "tokens", title: "Median tokens", format: ",.0f" },
+  ];
+  return {
+    id: "hero",
+    question: "Does the skill make agents better, cheaper, or both?",
+    caption: "Each line is one model, from ○ without the skill to ● with it.",
+    spec: {
+      ...base(theme),
+      width: "container",
+      height: 340,
+      layer: [
+        {
+          data: { values: moves },
+          mark: { type: "rule", strokeWidth: 2, color: theme.muted, strokeCap: "round" },
+          encoding: {
+            x: { ...x, field: "x" },
+            y: { ...y, field: "y" },
+            x2: { field: "x2" },
+            y2: { field: "y2" },
+          },
+        },
+        {
+          data: { values: points_ },
+          transform: [{ filter: `datum.arm === '${WITHOUT}'` }],
+          mark: { type: "point", filled: false, fill: theme.surface, size: 110, strokeWidth: 2 },
+          encoding: { x, y, color, tooltip },
+        },
+        {
+          data: { values: points_ },
+          transform: [{ filter: `datum.arm === '${WITH}'` }],
+          mark: { type: "circle", size: 110, stroke: theme.surface, strokeWidth: 2, opacity: 1 },
+          encoding: { x, y, color, tooltip },
+        },
+        {
+          data: { values: labels },
+          transform: [{ filter: "datum.side === 'right'" }],
+          mark: { type: "text", align: "left", dx: 10, dy: -10, fontSize: 12, color: theme.inkSecondary },
+          encoding: { x, y, text: { field: "model" } },
+        },
+        {
+          data: { values: labels },
+          transform: [{ filter: "datum.side === 'left'" }],
+          mark: { type: "text", align: "right", dx: -10, dy: -10, fontSize: 12, color: theme.inkSecondary },
+          encoding: { x, y, text: { field: "model" } },
+        },
+        // Hit targets bigger than the marks.
+        {
+          data: { values: points_ },
+          mark: { type: "circle", size: 700, opacity: 0 },
+          encoding: { x, y, tooltip },
+        },
+      ],
+    },
+    table: {
+      columns: ["Model", "Target checks (without → with)", "Cost per trial (without → with)", "Median tokens (without → with)"],
+      rows: results.models.map((result) => [
+        modelLabel(result),
+        `${percent(result.without.target)} → ${percent(result.with.target)}`,
+        `${usd(result.without.costUsd)} → ${usd(result.with.costUsd)}`,
+        `${compact(result.without.tokens.median)} → ${compact(result.with.tokens.median)}`,
+      ]),
+    },
+  };
+}
+
+function verdictLabel(result: ModelResult): string {
+  switch (result.verdict) {
+    case "helps":
+      return "✅ Helps";
+    case "hurts":
+      return "❌ Hurts";
+    case "no-effect":
+      return "➖ No effect";
+    case null:
+      return "… Not enough data";
+  }
+}
+
+/** ② Δ with its confidence interval, around zero: is the gain real or noise? */
+export function forestChart(results: Results, theme: Theme): ChartView {
+  const rows = results.models.flatMap((result) => {
+    const label = `${modelLabel(result)}   ${verdictLabel(result)}`;
+    const metrics = [
+      { metric: "Target checks", value: result.delta.target },
+      { metric: result.regression ? "Control checks ⚠" : "Control checks", value: result.delta.control },
+    ];
+    return metrics.flatMap(({ metric, value }) =>
+      value === null
+        ? []
+        : [{ model: label, metric, estimate: value.estimate * 100, low: value.low * 100, high: value.high * 100, text: interval(value) }],
+    );
+  });
+  const extent = Math.max(10, ...rows.flatMap((row) => [Math.abs(row.low), Math.abs(row.high)]));
+  const limit = Math.ceil((extent + 15) / 10) * 10;
+  const x = {
+    field: "estimate",
+    type: "quantitative" as const,
+    scale: { domain: [-limit, limit] },
+    axis: { title: "Δ pass rate, with − without (percentage points, 95% CI)", tickCount: 8 },
+  };
+  const y = { field: "model", type: "nominal" as const, sort: null, axis: { title: null, labelColor: theme.ink, labelPadding: 8 } };
+  const yOffset = { field: "metric", sort: null };
+  const color = {
+    field: "metric",
+    type: "nominal" as const,
+    scale: { domain: ["Target checks", "Control checks", "Control checks ⚠"], range: [theme.with, theme.without, theme.negative] },
+    legend: { title: null },
+  };
+  const tooltip = [
+    { field: "model", title: "Model" },
+    { field: "metric", title: "Checks" },
+    { field: "text", title: "Δ [95% CI]" },
+  ];
+  return {
+    id: "forest",
+    question: "Is the gain real, or noise?",
+    caption: "A bar that doesn't cross zero is a significant change. Control checks are practices the skill must not break.",
+    spec: {
+      ...base(theme),
+      width: "container",
+      data: { values: rows },
+      height: { step: 30 },
+      layer: [
+        { mark: { type: "rule", color: theme.axis }, encoding: { x: { datum: 0, type: "quantitative", scale: x.scale } } },
+        {
+          mark: { type: "rule", strokeWidth: 2, strokeCap: "round" },
+          encoding: { y, yOffset, x: { ...x, field: "low" }, x2: { field: "high" }, color, tooltip },
+        },
+        {
+          mark: { type: "circle", size: 90, stroke: theme.surface, strokeWidth: 2, opacity: 1 },
+          encoding: { y, yOffset, x, color, tooltip },
+        },
+        {
+          mark: { type: "text", align: "left", dx: 8, fontSize: 12, color: theme.inkSecondary },
+          encoding: { y, yOffset, x: { ...x, field: "high" }, text: { field: "text" } },
+        },
+      ],
+    },
+    table: {
+      columns: ["Model", "Verdict", "Δ target checks [95% CI]", "Δ control checks [95% CI]", "Δ works [95% CI]", "Normalized gain"],
+      rows: results.models.map((result) => [
+        modelLabel(result),
+        verdictLabel(result) + (result.regression ? " · ⚠ regression" : ""),
+        interval(result.delta.target),
+        interval(result.delta.control),
+        interval(result.delta.works),
+        percent(result.delta.normalizedGain),
+      ]),
+    },
+  };
+}
+
+/** ③ Per check, per model: which practices did the skill fix, and did any control move? */
+export function dumbbellChart(results: Results, theme: Theme): ChartView {
+  const rows = results.models.flatMap((result) =>
+    result.checks
+      .filter((check) => check.without.rate !== null || check.with.rate !== null)
+      .map((check, order) => ({
+        model: modelLabel(result),
+        check: `${check.role === "control" ? "Control · " : ""}${checkTitle(results, check.check)}`,
+        order,
+        without: check.without.rate,
+        with: check.with.rate,
+        delta: check.without.rate === null || check.with.rate === null ? "–" : points(check.with.rate - check.without.rate),
+        n: `${check.without.n} / ${check.with.n}`,
+      })),
+  );
+  const long = rows.flatMap((row) => [
+    { ...row, arm: WITHOUT, rate: row.without },
+    { ...row, arm: WITH, rate: row.with },
+  ]);
+  const scale = { domain: [0, 1], nice: false, padding: 8 };
+  const x = { field: "rate", type: "quantitative" as const, scale, axis: { format: ".0%", title: "Pass rate", tickCount: 5 } };
+  const y = { field: "check", type: "nominal" as const, sort: { field: "order" }, axis: { title: null, labelColor: theme.inkSecondary } };
+  const color = { field: "arm", type: "nominal" as const, scale: armScale(theme), legend: { title: null } };
+  const tooltip = [
+    { field: "check", title: "Check" },
+    { field: "arm", title: "Arm" },
+    { field: "rate", title: "Pass rate", format: ".0%" },
+    { field: "delta", title: "Δ" },
+    { field: "n", title: "Trials (without / with)" },
+  ];
+  return {
+    id: "dumbbell",
+    question: "What exactly did the skill fix?",
+    caption: "○ without the skill, ● with it. Control checks should not move.",
+    spec: {
+      ...base(theme, false),
+      data: { values: long },
+      facet: { field: "model", type: "nominal", title: null, header: { labelAnchor: "start", labelAlign: "left" } },
+      columns: 2,
+      resolve: { scale: { y: "independent" } },
+      spec: {
+        width: 300,
+        height: { step: 24 },
+        encoding: { y },
+        layer: [
+          {
+            transform: [{ filter: `datum.arm === '${WITH}'` }],
+            mark: { type: "rule", strokeWidth: 2, color: theme.axis, strokeCap: "round" },
+            encoding: { x: { field: "without", type: "quantitative", scale }, x2: { field: "with" } },
+          },
+          {
+            transform: [{ filter: `datum.arm === '${WITHOUT}'` }],
+            mark: { type: "point", filled: false, fill: theme.surface, size: 80, strokeWidth: 2 },
+            encoding: { x, color, tooltip },
+          },
+          {
+            transform: [{ filter: `datum.arm === '${WITH}'` }],
+            mark: { type: "circle", size: 80, stroke: theme.surface, strokeWidth: 2, opacity: 1 },
+            encoding: { x, color, tooltip },
+          },
+          { mark: { type: "circle", size: 500, opacity: 0 }, encoding: { x, tooltip } },
+        ],
+      },
+    },
+    table: {
+      columns: ["Model", "Check", "Without", "With", "Δ", "Trials (without / with)"],
+      rows: rows.map((row) => [row.model, row.check, percent(row.without), percent(row.with), row.delta, row.n]),
+    },
+  };
+}
+
+interface Measure {
+  readonly key: "tokens" | "turns" | "seconds";
+  readonly title: string;
+  readonly format: string;
+  readonly value: (trial: PublishedTrial) => number;
+  readonly change: (result: ModelResult) => string;
+}
+
+const MEASURES: readonly Measure[] = [
+  {
+    key: "tokens",
+    title: "Tokens per trial",
+    format: "~s",
+    value: (trial) => trial.agentReported.tokens.input + trial.agentReported.tokens.cached + trial.agentReported.tokens.output,
+    change: (result) => `median ${signedPercent(result.delta.tokensPct)}`,
+  },
+  {
+    key: "turns",
+    title: "Turns per trial",
+    format: "~d",
+    value: (trial) => trial.agentReported.turns,
+    change: (result) => `median ${signedNumber(result.delta.turns)}`,
+  },
+  {
+    key: "seconds",
+    title: "Agent time per trial (s)",
+    format: "~d",
+    value: (trial) => trial.agentSeconds,
+    change: (result) => `median ${signedNumber(result.delta.seconds)} s`,
+  },
+];
+
+/** ④ What the skill costs the agent: one panel per measure, never two scales on one axis. */
+export function efficiencyChart(results: Results, trials: readonly PublishedTrial[], theme: Theme): ChartView {
+  const labels = new Map(results.models.map((result) => [`${result.harness}\u0000${result.model}`, modelLabel(result)]));
+  const rows = trials
+    .filter((trial) => trial.arm !== "bundle")
+    .map((trial) => ({
+      model: labels.get(`${trial.harness}\u0000${trial.model}`) ?? `${trial.model} · ${trial.harness}`,
+      arm: trial.arm === "with" ? WITH : WITHOUT,
+      tokens: MEASURES[0]?.value(trial) ?? 0,
+      turns: trial.agentReported.turns,
+      seconds: trial.agentSeconds,
+    }));
+  const color = { field: "arm", type: "nominal" as const, scale: armScale(theme), legend: { title: null } };
+  const panels = MEASURES.map((measure) => {
+    const max = Math.max(1, ...rows.map((row) => row[measure.key]));
+    const notes = results.models.map((result) => ({ model: modelLabel(result), x: max, note: measure.change(result) }));
+    const y = { field: "model", type: "nominal" as const, sort: null, axis: { title: null, labelColor: theme.ink } };
+    return {
+      width: "container" as const,
+      height: { step: 22 },
+      title: measure.title,
+      layer: [
+        {
+          data: { values: rows },
+          mark: {
+            type: "boxplot" as const,
+            extent: "min-max" as const,
+            size: 14,
+            median: { color: theme.surface, strokeWidth: 2 },
+            rule: { color: theme.muted },
+          },
+          encoding: {
+            y,
+            yOffset: { field: "arm", sort: [WITHOUT, WITH] },
+            x: {
+              field: measure.key,
+              type: "quantitative" as const,
+              scale: { domainMax: max * 1.35 },
+              axis: { format: measure.format, title: null, tickCount: 5 },
+            },
+            color,
+          },
+        },
+        {
+          data: { values: notes },
+          mark: { type: "text" as const, align: "left" as const, dx: 10, fontSize: 12, color: theme.inkSecondary },
+          encoding: { y, x: { field: "x", type: "quantitative" as const }, text: { field: "note" } },
+        },
+      ],
+    };
+  });
+  return {
+    id: "efficiency",
+    question: "What does the skill cost the agent?",
+    caption: "Box: middle half of the trials, line: median, whiskers: min and max. Tokens and turns are agent-reported.",
+    spec: { ...base(theme), vconcat: panels, spacing: 24 },
+    table: {
+      columns: ["Model", "Median tokens (without → with)", "Median turns", "Median seconds", "Cost per trial", "Cost per success"],
+      rows: results.models.map((result) => [
+        modelLabel(result),
+        `${compact(result.without.tokens.median)} → ${compact(result.with.tokens.median)} (${signedPercent(result.delta.tokensPct)})`,
+        `${result.without.turns.toFixed(0)} → ${result.with.turns.toFixed(0)}`,
+        `${result.without.seconds.toFixed(0)} → ${result.with.seconds.toFixed(0)}`,
+        `${usd(result.without.costUsd)} → ${usd(result.with.costUsd)} (${signedUsd(result.delta.costUsd)})`,
+        `${result.without.costPerSuccessUsd === null ? "–" : usd(result.without.costPerSuccessUsd)} → ${
+          result.with.costPerSuccessUsd === null ? "–" : usd(result.with.costPerSuccessUsd)
+        }`,
+      ]),
+    },
+  };
+}
+
+const LOADED_SUCCESS = "Loaded · succeeded";
+const LOADED_FAILURE = "Loaded · failed";
+const NOT_LOADED = "Not loaded";
+
+/** ⑤ Did the agent even load the skill? Separates a weak skill from a description that never triggers. */
+export function triggerChart(results: Results, theme: Theme): ChartView {
+  const rows = results.models.flatMap((result) => {
+    const model = modelLabel(result);
+    return [
+      { model, segment: LOADED_SUCCESS, order: 0, count: result.trigger.loadedSuccess },
+      { model, segment: LOADED_FAILURE, order: 1, count: result.trigger.loadedFailure },
+      { model, segment: NOT_LOADED, order: 2, count: result.trigger.notLoaded },
+    ];
+  });
+  const notes = results.models.map((result) => ({ model: modelLabel(result), note: `${percent(result.with.triggered)} loaded` }));
+  const y = { field: "model", type: "nominal" as const, sort: null, axis: { title: null, labelColor: theme.ink } };
+  return {
+    id: "trigger",
+    question: "Did the agent even load the skill?",
+    caption: "With-skill trials only. Many “not loaded” trials point at the skill's description, not its content.",
+    spec: {
+      ...base(theme),
+      width: "container",
+      height: { step: 34 },
+      layer: [
+        {
+          data: { values: rows },
+          mark: { type: "bar", size: 22, cornerRadius: 0, stroke: theme.surface, strokeWidth: 2 },
+          encoding: {
+            y,
+            x: { field: "count", type: "quantitative", stack: "normalize", axis: { format: ".0%", title: null, values: [0, 0.25, 0.5, 0.75, 1] }, scale: { domain: [0, 1.25] } },
+            color: {
+              field: "segment",
+              type: "nominal",
+              scale: { domain: [LOADED_SUCCESS, LOADED_FAILURE, NOT_LOADED], range: [theme.with, theme.withLight, theme.axis] },
+              legend: { title: null },
+            },
+            order: { field: "order" },
+            tooltip: [
+              { field: "model", title: "Model" },
+              { field: "segment", title: "Trials" },
+              { field: "count", title: "Count" },
+            ],
+          },
+        },
+        {
+          data: { values: notes },
+          mark: { type: "text", align: "left", dx: 8, fontSize: 12, color: theme.inkSecondary },
+          encoding: { y, x: { datum: 1 }, text: { field: "note" } },
+        },
+      ],
+    },
+    table: {
+      columns: ["Model", LOADED_SUCCESS, LOADED_FAILURE, NOT_LOADED, "Loaded"],
+      rows: results.models.map((result) => [
+        modelLabel(result),
+        String(result.trigger.loadedSuccess),
+        String(result.trigger.loadedFailure),
+        String(result.trigger.notLoaded),
+        percent(result.with.triggered),
+      ]),
+    },
+  };
+}
+
+/** ⑥ Task × check Δ, for finding where a skill helps or hurts. */
+export function heatmapChart(results: Results, theme: Theme): ChartView {
+  const checks = [...results.targets, ...results.controls];
+  const rows = results.models.flatMap((result) =>
+    result.tasks.flatMap((task) =>
+      checks.map((check, order) => {
+        const delta = task.checks[check] ?? null;
+        return {
+          model: modelLabel(result),
+          task: task.task,
+          check: `${results.controls.includes(check) ? "Control · " : ""}${checkTitle(results, check)}`,
+          order,
+          delta: delta === null ? null : delta * 100,
+          text: delta === null ? "n/a" : points(delta),
+        };
+      }),
+    ),
+  );
+  return {
+    id: "heatmap",
+    question: "Where, task by task, did each check move?",
+    caption: "Δ pass rate per task and check. Blue: better with the skill, red: worse, gray cross: the check doesn't apply.",
+    spec: {
+      ...base(theme, false),
+      data: { values: rows },
+      facet: { row: { field: "model", type: "nominal", title: null, header: { labelAngle: 0, labelAlign: "left", labelAnchor: "start", labelOrient: "top" } } },
+      spec: {
+        width: { step: 64 },
+        height: { step: 24 },
+        encoding: {
+          x: { field: "task", type: "nominal", axis: { title: null, labelAngle: -30, orient: "top" } },
+          y: { field: "check", type: "nominal", sort: { field: "order" }, axis: { title: null, labelColor: theme.inkSecondary } },
+          tooltip: [
+            { field: "task", title: "Task" },
+            { field: "check", title: "Check" },
+            { field: "text", title: "Δ pass rate" },
+          ],
+        },
+        layer: [
+          {
+            transform: [{ filter: "datum.delta !== null" }],
+            mark: { type: "rect", stroke: theme.surface, strokeWidth: 2, cornerRadius: 3 },
+            encoding: {
+              color: {
+                field: "delta",
+                type: "quantitative",
+                scale: { domain: [-100, 0, 100], range: [theme.negative, theme.neutral, theme.positive], interpolate: "lab" },
+                legend: { title: "Δ pts", orient: "right", gradientLength: 120 },
+              },
+            },
+          },
+          {
+            transform: [{ filter: "datum.delta === null" }],
+            mark: { type: "text", text: "×", color: theme.muted, fontSize: 12 },
+          },
+        ],
+      },
+      resolve: { scale: { y: "shared" } },
+    },
+    table: {
+      columns: ["Model", "Task", "Check", "Δ pass rate"],
+      rows: rows.map((row) => [row.model, row.task, row.check, row.text]),
+    },
+  };
+}
+
+export function charts(results: Results, trials: readonly PublishedTrial[], theme: Theme): ChartView[] {
+  return [
+    heroChart(results, theme),
+    forestChart(results, theme),
+    dumbbellChart(results, theme),
+    efficiencyChart(results, trials, theme),
+    triggerChart(results, theme),
+    heatmapChart(results, theme),
+  ];
+}

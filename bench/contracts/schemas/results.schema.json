@@ -1,0 +1,753 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "skill": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "skillSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "skillVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 64,
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      }
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 64,
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 64,
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      }
+    },
+    "checkTitles": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "maxLength": 64,
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 80
+      }
+    },
+    "bootstrap": {
+      "type": "object",
+      "properties": {
+        "resamples": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "confidence": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        }
+      },
+      "required": [
+        "resamples",
+        "seed",
+        "confidence"
+      ],
+      "additionalProperties": false
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "harness": {
+            "type": "string",
+            "enum": [
+              "claude-code",
+              "codex",
+              "opencode"
+            ]
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+          },
+          "without": {
+            "type": "object",
+            "properties": {
+              "trials": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "works": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "target": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "control": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "successes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "tokens": {
+                "type": "object",
+                "properties": {
+                  "median": {
+                    "type": "number"
+                  },
+                  "p90": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "median",
+                  "p90"
+                ],
+                "additionalProperties": false
+              },
+              "turns": {
+                "type": "number"
+              },
+              "seconds": {
+                "type": "number"
+              },
+              "costUsd": {
+                "type": "number"
+              },
+              "costPerSuccessUsd": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "triggered": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "trials",
+              "works",
+              "target",
+              "control",
+              "successes",
+              "tokens",
+              "turns",
+              "seconds",
+              "costUsd",
+              "costPerSuccessUsd",
+              "triggered"
+            ],
+            "additionalProperties": false
+          },
+          "with": {
+            "type": "object",
+            "properties": {
+              "trials": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "works": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "target": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "control": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "successes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "tokens": {
+                "type": "object",
+                "properties": {
+                  "median": {
+                    "type": "number"
+                  },
+                  "p90": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "median",
+                  "p90"
+                ],
+                "additionalProperties": false
+              },
+              "turns": {
+                "type": "number"
+              },
+              "seconds": {
+                "type": "number"
+              },
+              "costUsd": {
+                "type": "number"
+              },
+              "costPerSuccessUsd": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "triggered": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "trials",
+              "works",
+              "target",
+              "control",
+              "successes",
+              "tokens",
+              "turns",
+              "seconds",
+              "costUsd",
+              "costPerSuccessUsd",
+              "triggered"
+            ],
+            "additionalProperties": false
+          },
+          "delta": {
+            "type": "object",
+            "properties": {
+              "target": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "estimate": {
+                        "type": "number"
+                      },
+                      "low": {
+                        "type": "number"
+                      },
+                      "high": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "estimate",
+                      "low",
+                      "high"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "control": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "estimate": {
+                        "type": "number"
+                      },
+                      "low": {
+                        "type": "number"
+                      },
+                      "high": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "estimate",
+                      "low",
+                      "high"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "works": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "estimate": {
+                        "type": "number"
+                      },
+                      "low": {
+                        "type": "number"
+                      },
+                      "high": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "estimate",
+                      "low",
+                      "high"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "normalizedGain": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "tokensPct": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "costUsd": {
+                "type": "number"
+              },
+              "turns": {
+                "type": "number"
+              },
+              "seconds": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "target",
+              "control",
+              "works",
+              "normalizedGain",
+              "tokensPct",
+              "costUsd",
+              "turns",
+              "seconds"
+            ],
+            "additionalProperties": false
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "helps",
+                  "no-effect",
+                  "hurts"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "regression": {
+            "type": "boolean"
+          },
+          "trigger": {
+            "type": "object",
+            "properties": {
+              "loadedSuccess": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "loadedFailure": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "notLoaded": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "loadedSuccess",
+              "loadedFailure",
+              "notLoaded"
+            ],
+            "additionalProperties": false
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "check": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "target",
+                    "control"
+                  ]
+                },
+                "without": {
+                  "type": "object",
+                  "properties": {
+                    "rate": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "n": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "rate",
+                    "n"
+                  ],
+                  "additionalProperties": false
+                },
+                "with": {
+                  "type": "object",
+                  "properties": {
+                    "rate": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "n": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "rate",
+                    "n"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "check",
+                "role",
+                "without",
+                "with"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "task": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                },
+                "target": {
+                  "type": "object",
+                  "properties": {
+                    "without": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "with": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "without",
+                    "with"
+                  ],
+                  "additionalProperties": false
+                },
+                "checks": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                  },
+                  "additionalProperties": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "task",
+                "target",
+                "checks"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "harness",
+          "model",
+          "without",
+          "with",
+          "delta",
+          "verdict",
+          "regression",
+          "trigger",
+          "checks",
+          "tasks"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "overall": {
+      "type": "object",
+      "properties": {
+        "verdicts": {
+          "type": "object",
+          "properties": {
+            "helps": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "noEffect": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "hurts": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "helps",
+            "noEffect",
+            "hurts"
+          ],
+          "additionalProperties": false
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "estimate": {
+                  "type": "number"
+                },
+                "low": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "estimate",
+                "low",
+                "high"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tokensPct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "triggered": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "costUsd": {
+          "type": "number"
+        },
+        "maxUsd": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "verdicts",
+        "target",
+        "tokensPct",
+        "triggered",
+        "costUsd",
+        "maxUsd"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "skill",
+    "skillSha",
+    "skillVersion",
+    "tasks",
+    "targets",
+    "controls",
+    "checkTitles",
+    "bootstrap",
+    "models",
+    "overall"
+  ],
+  "additionalProperties": false
+}

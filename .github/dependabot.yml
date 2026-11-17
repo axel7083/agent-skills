@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # pnpm workspace (pnpm-lock.yaml). The cooldown matches pnpm's minimumReleaseAge.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    groups:
+      nestjs:
+        patterns: ["@nestjs/*"]
+      drizzle:
+        patterns: ["drizzle-*"]
+      vega:
+        patterns: ["vega", "vega-*"]
+      lint:
+        patterns: ["eslint", "@eslint/*", "typescript-eslint"]
+
+  # Actions are pinned by commit SHA.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+
+  # Base images of the benchmark sandbox and of the server, pinned by digest.
+  - package-ecosystem: docker
+    directories:
+      - /bench/sandbox
+      - /bench/server
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+
+  # Harbor, the agent runner, pinned with hashes in bench/runner/requirements.txt.
+  - package-ecosystem: pip
+    directory: /bench/runner
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3

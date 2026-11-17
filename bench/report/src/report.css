@@ -1,0 +1,241 @@
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb;
+  --page: #f9f9f7;
+  --ink: #0b0b0b;
+  --ink-secondary: #52514e;
+  --muted: #898781;
+  --hairline: #e1e0d9;
+  --ring: rgba(11, 11, 11, 0.1);
+  --accent: #2a78d6;
+  --warning: #fab219;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --ink: #f0efec;
+    --ink-secondary: #c3c2b7;
+    --hairline: #2c2c2a;
+    --ring: rgba(255, 255, 255, 0.1);
+    --accent: #3987e5;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --page: #0d0d0d;
+  --ink: #f0efec;
+  --ink-secondary: #c3c2b7;
+  --hairline: #2c2c2a;
+  --ring: rgba(255, 255, 255, 0.1);
+  --accent: #3987e5;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+}
+
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+h1 {
+  margin: 4px 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 14px;
+}
+
+.banner {
+  margin: 16px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--warning);
+  background: var(--surface-1);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.tile {
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: var(--surface-1);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+
+.tile p {
+  margin: 0;
+}
+
+.tile-label {
+  color: var(--ink-secondary);
+  font-size: 13px;
+}
+
+.tile-value {
+  margin-top: 6px !important;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.tile-detail {
+  margin-top: 4px !important;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin: 8px 0 16px;
+  color: var(--ink-secondary);
+  font-size: 14px;
+}
+
+.filters select,
+.theme-toggle {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.theme-toggle {
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.charts {
+  transition: opacity 120ms;
+}
+
+.charts.refreshing {
+  opacity: 0.5;
+}
+
+.chart {
+  margin: 16px 0;
+  padding: 20px 20px 12px;
+  border-radius: 8px;
+  background: var(--surface-1);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+
+.chart h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.caption {
+  margin: 4px 0 12px;
+  color: var(--ink-secondary);
+  font-size: 13px;
+}
+
+.plot {
+  width: 100%;
+}
+
+.plot svg {
+  max-width: 100%;
+}
+
+.drill-down > summary {
+  margin: 24px 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.table-view {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.table-view summary {
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.table-view table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-view th,
+.table-view td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+}
+
+.table-view th {
+  color: var(--ink-secondary);
+  font-weight: 500;
+}
+
+/* vega-tooltip, without its injected default style (CSP: no inline <style>). */
+#vg-tooltip-element {
+  visibility: hidden;
+  position: fixed;
+  z-index: 1000;
+  max-width: 320px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--surface-1);
+  box-shadow: 0 0 0 1px var(--ring), 0 4px 12px rgba(0, 0, 0, 0.12);
+  color: var(--ink);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+#vg-tooltip-element.visible {
+  visibility: visible;
+}
+
+#vg-tooltip-element table {
+  border-spacing: 0;
+}
+
+#vg-tooltip-element td.key {
+  padding-right: 8px;
+  color: var(--ink-secondary);
+}
+
+#vg-tooltip-element td.value {
+  font-weight: 600;
+}

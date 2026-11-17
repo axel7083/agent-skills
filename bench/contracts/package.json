@@ -1,0 +1,27 @@
+{
+  "name": "@podman-desktop/bench-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Benchmark data shared across the trust boundary (trials, results), and the statistics computed on it",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@podman-desktop/bench-source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "schemas"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "gen": "node --conditions=@podman-desktop/bench-source scripts/emit-json-schemas.ts"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}
