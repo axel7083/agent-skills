@@ -29,6 +29,8 @@ export const PriceFile = z.record(
     output: UsdPerToken,
     cacheRead: UsdPerToken.optional(),
     cacheWrite: UsdPerToken.optional(),
+    /** Where the price comes from: the public list it was taken from. */
+    source: z.string().max(200).optional(),
   }),
 );
 export type PriceFile = z.infer<typeof PriceFile>;
