@@ -48,7 +48,7 @@ Each completed run has a page, `/runs/<run id>`, built from the published data:
 6. **Was the skill loaded?** Loaded and succeeded, loaded and failed, not loaded.
 7. Drill-down: Δ per task and check.
 
-Every chart has a table view. `pnpm --filter @podman-desktop/bench-report mockup` renders the page
+Every chart has a table view. `pnpm --filter @podman-desktop/agent-skills-bench-report mockup` renders the page
 on invented data.
 
 ## Raw data
@@ -62,6 +62,7 @@ Public and read-only, served from the server's database:
 | `GET /api/v1/runs/:id/trials` | One trial per line (NDJSON), checks with evidence, link to the transcript artifact |
 | `GET /api/v1/runs/:id/results` | The aggregates the report shows |
 | `GET /api/v1/schema/v1/<name>.json` | JSON Schema of each document (`run`, `run-summary`, `trial`, `published-trial`, `results`, `eval`) |
+| `GET /api/v1/openapi.json` | The server's OpenAPI document, workflow endpoints included |
 
 Transcripts and the agents' final files stay in the workflow run's artifacts (30 days).
 
@@ -88,7 +89,8 @@ flowchart LR
 | Package | Role |
 |---|---|
 | `bench/contracts` | zod types shared by both sides (trial, results, API), the statistics |
-| `bench/server` | NestJS on `@nestjs/platform-node`, Drizzle + Postgres: runs, keys, trials, results, report, API |
+| `bench/server` | NestJS on `@nestjs/platform-node`, Drizzle + Postgres: runs, keys, trials, results, report, API; its OpenAPI document (`@nestjs/swagger`, schemas from the contracts' zod schemas) in `bench/server/openapi/` |
+| `bench/server-client` | The server's client, generated from that document by `@hey-api/openapi-ts` (fetch client, zod validation both ways) |
 | `bench/report` | Vega-Lite charts and the report page |
 | `bench/runner` | The workflow's CLI: `plan`, `agent` (Harbor), `grade`, `complete`, `oracles` |
 | `bench/tasks` | Task apps, specs and oracles |
@@ -119,6 +121,17 @@ flowchart LR
   same run (bounded by the run's cap, visible as a key without trials), or forge its own transcript
   and token counts (agent-reported, cross-checked).
 
+## Generated files
+
+CI fails when one of them is out of date; regenerate with:
+
+```sh
+pnpm --filter @podman-desktop/agent-skills-bench-contracts gen      # JSON Schemas
+pnpm --filter @podman-desktop/agent-skills-bench-server gen         # OpenAPI document
+pnpm --filter @podman-desktop/agent-skills-bench-server-client gen  # client, from the document
+pnpm license:fix                                                    # license headers
+```
+
 ## Tasks and oracles
 
 A task is `bench/tasks/<id>/`: `instruction.md`, `app/` (what the agent starts from, with a planted
@@ -128,7 +141,7 @@ one, valid alternatives and a `naive` one. `bench-ci.yml` grades every oracle on
 so a grader change that would misjudge a known answer fails before any agent is graded by it.
 
 ```sh
-node --conditions=@podman-desktop/bench-source bench/runner/src/cli.ts oracles   # needs Podman
+node --conditions=@podman-desktop/agent-skills-source bench/runner/src/cli.ts oracles   # needs Podman
 ```
 
 ## Running a benchmark

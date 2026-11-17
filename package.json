@@ -11,12 +11,15 @@
   },
   "scripts": {
     "build": "pnpm --recursive --sort run build",
-    "typecheck": "pnpm --recursive run typecheck",
-    "lint": "eslint --max-warnings 0 .",
-    "test": "vitest run",
+    "typecheck": "pnpm generated && pnpm --recursive run typecheck",
+    "lint": "pnpm generated && eslint --max-warnings 0 .",
+    "test": "pnpm generated && vitest run",
     "test:watch": "vitest",
     "gen": "pnpm --recursive run gen",
-    "check": "pnpm typecheck && pnpm lint && pnpm test"
+    "check": "pnpm license && pnpm typecheck && pnpm lint && pnpm test",
+    "generated": "pnpm --filter @podman-desktop/agent-skills-bench-server-client build",
+    "license": "node scripts/license-headers.ts",
+    "license:fix": "node scripts/license-headers.ts --fix"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

@@ -1,5 +1,5 @@
 {
-  "name": "@podman-desktop/bench-runner",
+  "name": "@podman-desktop/agent-skills-bench-runner",
   "version": "0.1.0",
   "private": true,
   "description": "The benchmark's jobs on GitHub runners: plan, run the agent with Harbor, grade, complete",
@@ -10,10 +10,11 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "cli": "node --conditions=@podman-desktop/bench-source src/cli.ts"
+    "cli": "node --conditions=@podman-desktop/agent-skills-source src/cli.ts"
   },
   "dependencies": {
-    "@podman-desktop/bench-contracts": "workspace:*",
+    "@podman-desktop/agent-skills-bench-contracts": "workspace:*",
+    "@podman-desktop/agent-skills-bench-server-client": "workspace:*",
     "yaml": "catalog:",
     "zod": "catalog:"
   }

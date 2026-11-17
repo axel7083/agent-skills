@@ -1,53 +1,64 @@
-import {
+/**********************************************************************
+ * Copyright (C) 2026 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ***********************************************************************/
+
+import type {
   CompleteRunResponse,
-  type CreateRunRequest,
+  CreateRunRequest,
   CreateRunResponse,
   MintedKey,
-  type UploadTrialsRequest,
-} from "@podman-desktop/bench-contracts";
-import type { z } from "zod";
+  UploadTrialsRequest,
+} from "@podman-desktop/agent-skills-bench-contracts";
+import { completeRun, createRun, mintKey, revokeKey, uploadTrials } from "@podman-desktop/agent-skills-bench-server-client";
+import { createClient } from "@podman-desktop/agent-skills-bench-server-client/client";
 import { oidcToken } from "./github.ts";
 
-/** The bench server, called with a fresh OIDC token each time (the server accepts them 10 minutes). */
+/**
+ * The bench server, through the client generated from its OpenAPI document: requests and
+ * responses are validated against it. Each call carries a fresh OIDC token (the server accepts
+ * them for 10 minutes; the agent job outlives that).
+ */
 export class ServerClient {
-  private readonly baseUrl: string;
+  private readonly client: ReturnType<typeof createClient>;
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+    this.client = createClient({ baseUrl, auth: () => oidcToken(baseUrl), throwOnError: true });
   }
 
-  createRun(request: CreateRunRequest): Promise<CreateRunResponse> {
-    return this.call("POST", "/v1/runs", CreateRunResponse, request);
+  async createRun(request: CreateRunRequest): Promise<CreateRunResponse> {
+    const { data } = await createRun({ client: this.client, body: request, throwOnError: true });
+    return data;
   }
 
-  mintKey(runId: string, shard: string): Promise<MintedKey> {
-    return this.call("POST", `/v1/runs/${runId}/shards/${shard}/key`, MintedKey);
+  async mintKey(runId: string, shard: string): Promise<MintedKey> {
+    const { data } = await mintKey({ client: this.client, path: { run: runId, shard }, throwOnError: true });
+    return data;
   }
 
   async revokeKey(runId: string, shard: string): Promise<void> {
-    await this.call("DELETE", `/v1/runs/${runId}/shards/${shard}/key`, undefined);
+    await revokeKey({ client: this.client, path: { run: runId, shard }, throwOnError: true });
   }
 
   async uploadTrials(runId: string, upload: UploadTrialsRequest): Promise<void> {
-    await this.call("POST", `/v1/runs/${runId}/trials`, undefined, upload);
+    await uploadTrials({ client: this.client, path: { run: runId }, body: upload, throwOnError: true });
   }
 
-  complete(runId: string): Promise<CompleteRunResponse> {
-    return this.call("POST", `/v1/runs/${runId}/complete`, CompleteRunResponse);
-  }
-
-  private async call<T>(method: string, path: string, schema: z.ZodType<T>, body?: unknown): Promise<T>;
-  private async call(method: string, path: string, schema: undefined, body?: unknown): Promise<undefined>;
-  private async call<T>(method: string, path: string, schema: z.ZodType<T> | undefined, body?: unknown): Promise<T | undefined> {
-    const token = await oidcToken(this.baseUrl);
-    const response = await fetch(new URL(path, this.baseUrl), {
-      method,
-      headers: { authorization: `Bearer ${token}`, ...(body === undefined ? {} : { "content-type": "application/json" }) },
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-      signal: AbortSignal.timeout(120_000),
-    });
-    const text = await response.text();
-    if (!response.ok) throw new Error(`${method} ${path}: HTTP ${String(response.status)} ${text.slice(0, 200)}`);
-    return schema === undefined ? undefined : schema.parse(JSON.parse(text));
+  async complete(runId: string): Promise<CompleteRunResponse> {
+    const { data } = await completeRun({ client: this.client, path: { run: runId }, throwOnError: true });
+    return data;
   }
 }

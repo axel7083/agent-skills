@@ -1,7 +1,25 @@
+/**********************************************************************
+ * Copyright (C) 2026 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ***********************************************************************/
+
 import { setTimeout as sleep } from "node:timers/promises";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectDrizzle } from "@nestjs/drizzle";
-import type { MintedKey } from "@podman-desktop/bench-contracts";
+import type { MintedKey } from "@podman-desktop/agent-skills-bench-contracts";
 import { and, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import { Clock } from "../common/clock.ts";
 import { BudgetExceeded, Conflict, Forbidden, NotFound } from "../common/errors.ts";

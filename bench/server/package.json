@@ -1,5 +1,5 @@
 {
-  "name": "@podman-desktop/bench-server",
+  "name": "@podman-desktop/agent-skills-bench-server",
   "version": "0.1.0",
   "private": true,
   "description": "The benchmark server: runs, budget-capped LLM keys, trials, statistics, the report and the raw-data API",
@@ -15,7 +15,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "node --enable-source-maps dist/main.js",
     "db:generate": "drizzle-kit generate",
-    "db:check": "drizzle-kit check"
+    "db:check": "drizzle-kit check",
+    "gen": "tsc -p tsconfig.scripts.json && node --conditions=@podman-desktop/agent-skills-source dist-scripts/scripts/emit-openapi.js"
   },
   "dependencies": {
     "@nestjs/common": "catalog:",
@@ -23,9 +24,10 @@
     "@nestjs/drizzle": "catalog:",
     "@nestjs/platform-node": "catalog:",
     "@nestjs/schedule": "catalog:",
+    "@nestjs/swagger": "catalog:",
     "@nestjs/throttler": "catalog:",
-    "@podman-desktop/bench-contracts": "workspace:*",
-    "@podman-desktop/bench-report": "workspace:*",
+    "@podman-desktop/agent-skills-bench-contracts": "workspace:*",
+    "@podman-desktop/agent-skills-bench-report": "workspace:*",
     "drizzle-orm": "catalog:",
     "jose": "catalog:",
     "nestjs-pino": "catalog:",
@@ -39,6 +41,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "catalog:",
+    "@podman-desktop/agent-skills-bench-server-client": "workspace:*",
     "@testcontainers/postgresql": "catalog:",
     "@types/pg": "catalog:",
     "drizzle-kit": "catalog:",

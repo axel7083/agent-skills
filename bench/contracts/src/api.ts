@@ -1,3 +1,21 @@
+/**********************************************************************
+ * Copyright (C) 2026 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ***********************************************************************/
+
 import { z } from "zod";
 import { Arm, CheckId, Harness, ModelId, SemVer, Sha, Slug } from "./ids.ts";
 import { EvalSpec, Trial } from "./trial.ts";
@@ -104,9 +122,23 @@ export const ShardBilling = z.strictObject({
 });
 export type ShardBilling = z.infer<typeof ShardBilling>;
 
+/** `GET /api/v1/runs`. */
+export const RunList = z.strictObject({
+  schemaVersion: z.literal(1),
+  runs: z.array(RunSummary),
+});
+export type RunList = z.infer<typeof RunList>;
+
 export const RunDetail = RunSummary.extend({
   tasks: z.array(Slug),
   shards: z.array(Shard),
   billing: z.array(ShardBilling),
 });
 export type RunDetail = z.infer<typeof RunDetail>;
+
+/** The body of every error the server answers: a code only, the reason stays in its log. */
+export const ErrorBody = z.strictObject({ error: z.string() });
+export type ErrorBody = z.infer<typeof ErrorBody>;
+
+export const Health = z.strictObject({ status: z.literal("ok") });
+export type Health = z.infer<typeof Health>;

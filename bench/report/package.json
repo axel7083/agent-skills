@@ -1,5 +1,5 @@
 {
-  "name": "@podman-desktop/bench-report",
+  "name": "@podman-desktop/agent-skills-bench-report",
   "version": "0.1.0",
   "private": true,
   "description": "The benchmark's run report: Vega-Lite charts over a run's results, served by the bench server",
@@ -7,7 +7,7 @@
   "type": "module",
   "exports": {
     ".": {
-      "@podman-desktop/bench-source": "./src/index.ts",
+      "@podman-desktop/agent-skills-source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -18,10 +18,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/bundle.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "mockup": "node --conditions=@podman-desktop/bench-source scripts/mockup.ts"
+    "mockup": "node --conditions=@podman-desktop/agent-skills-source scripts/mockup.ts"
   },
   "dependencies": {
-    "@podman-desktop/bench-contracts": "workspace:*",
+    "@podman-desktop/agent-skills-bench-contracts": "workspace:*",
     "vega": "catalog:",
     "vega-embed": "catalog:",
     "vega-interpreter": "catalog:",
