@@ -1,0 +1,5 @@
+# Another valid strategy: distroless, non-root, Dockerfile naming, no HEALTHCHECK (no shell to run one).
+works: true
+pass: [fq-image-names, base-digest-pinned, non-root-user, no-secret-in-image, exec-form-entrypoint]
+fail: [healthcheck, containerfile-name, containerignore]
+na: [numeric-user, group0-writable, multi-stage]

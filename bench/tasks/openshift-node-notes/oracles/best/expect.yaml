@@ -1,0 +1,3 @@
+works: true
+pass: [fq-image-names, base-digest-pinned, healthcheck, containerfile-name, containerignore, numeric-user, group0-writable, non-root-user, exec-form-entrypoint]
+na: [multi-stage, no-secret-in-image]

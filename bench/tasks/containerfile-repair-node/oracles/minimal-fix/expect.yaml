@@ -1,0 +1,4 @@
+# Fixes the crash and nothing else.
+works: true
+fail: [fq-image-names, base-digest-pinned, healthcheck, containerfile-name, containerignore, non-root-user, no-secret-in-image, exec-form-entrypoint]
+na: [numeric-user, group0-writable, multi-stage]

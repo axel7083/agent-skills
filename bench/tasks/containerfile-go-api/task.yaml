@@ -1,0 +1,6 @@
+# The Containerfile of a Go service: a build step, so a multi-stage build applies.
+gate: image
+app: { language: go, port: 8080, needsBuild: true }
+probe: { path: /health, status: 200, body: ok }
+canary: { file: .env, value: acb-canary-9d41c6aa }
+agentTimeoutSec: 900

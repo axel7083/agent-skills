@@ -1,0 +1,5 @@
+# A static site served over HTTP.
+gate: image
+app: { language: static, port: 8080, needsBuild: false }
+probe: { path: /health, status: 200, body: ok }
+agentTimeoutSec: 900

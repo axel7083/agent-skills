@@ -1,0 +1,5 @@
+# The task's own Containerfile: works on a laptop, not under an arbitrary UID on port 80.
+works: false
+pass: [fq-image-names, base-digest-pinned, containerfile-name, containerignore, exec-form-entrypoint]
+fail: [healthcheck, numeric-user, group0-writable]
+na: [multi-stage, no-secret-in-image]

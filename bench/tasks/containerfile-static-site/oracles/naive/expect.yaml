@@ -1,0 +1,3 @@
+works: true
+fail: [fq-image-names, base-digest-pinned, healthcheck, containerfile-name, containerignore, non-root-user]
+na: [numeric-user, group0-writable, multi-stage, no-secret-in-image, exec-form-entrypoint]

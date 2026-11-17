@@ -1,0 +1,10 @@
+# Runs on laptops, fails on OpenShift: arbitrary UID in the root group, no capabilities, no low ports.
+gate: image
+app: { language: node, port: 80, needsBuild: false }
+probe: { path: /health, status: 200, body: ok }
+run:
+  # OpenShift restricted-v2, emulated with Podman.
+  args: ["--user", "40713:0", "--cap-drop=all", "--security-opt", "no-new-privileges", "--sysctl", "net.ipv4.ip_unprivileged_port_start=1024"]
+  portFromImage: true
+openshift: { writePath: /notes }
+agentTimeoutSec: 900

@@ -1,0 +1,47 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { Cell, type CreateRunRequest } from "@podman-desktop/bench-contracts";
+import { parse } from "yaml";
+import { z } from "zod";
+import { run } from "../exec.ts";
+import { CHECK_TITLES } from "../graders/checks.ts";
+import { setOutput } from "../github.ts";
+import { REPO_ROOT, SKILLS_DIR } from "../paths.ts";
+import { ServerClient } from "../server-client.ts";
+import { loadEval, loadTask } from "../tasks.ts";
+
+const SkillFrontMatter = z.looseObject({ name: z.string(), metadata: z.looseObject({ version: z.string() }) });
+
+export interface PlanOptions {
+  readonly server: string;
+  readonly skill: string;
+  readonly cells: string;
+  readonly trials: number;
+  readonly maxUsd: number;
+}
+
+/** Registers the run with the server and writes the agent jobs' matrix as a step output. */
+export async function plan(options: PlanOptions): Promise<void> {
+  const spec = loadEval(options.skill);
+  const skillFile = readFileSync(join(SKILLS_DIR, spec.skill, "SKILL.md"), "utf8");
+  const frontMatter = SkillFrontMatter.parse(parse(/^---\n([\s\S]*?)\n---/.exec(skillFile)?.[1] ?? ""));
+  // The skill's tree: any change to any of its files is a new version of what is measured.
+  const tree = await run("git", ["rev-parse", `HEAD:skills/${spec.skill}`], { cwd: REPO_ROOT });
+  if (tree.code !== 0) throw new Error(`git rev-parse failed: ${tree.stderr}`);
+  const timeouts = spec.tasks.map((id) => loadTask(id).spec.agentTimeoutSec);
+  const request: CreateRunRequest = {
+    spec,
+    skillSha: tree.stdout.trim(),
+    skillVersion: frontMatter.metadata.version,
+    checkTitles: Object.fromEntries([...spec.targets, ...spec.controls].map((check) => [check, CHECK_TITLES[check] ?? check])),
+    cells: z.array(Cell).parse(JSON.parse(options.cells)),
+    arms: ["without", "with"],
+    trials: options.trials,
+    maxUsd: options.maxUsd,
+    agentTimeoutMinutes: Math.ceil(Math.max(...timeouts) / 60),
+  };
+  const created = await new ServerClient(options.server).createRun(request);
+  console.log(`run ${created.runId}: ${String(created.shards.length)} shards`);
+  setOutput("run-id", created.runId);
+  setOutput("matrix", JSON.stringify({ shard: created.shards }));
+}

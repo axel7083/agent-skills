@@ -1,0 +1,6 @@
+# The Containerfile of a Node.js API, from scratch.
+gate: image
+app: { language: node, port: 8080, needsBuild: false }
+probe: { path: /health, status: 200, body: ok }
+canary: { file: .env, value: acb-canary-7f3a9c1e }
+agentTimeoutSec: 900

@@ -4,7 +4,8 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["**/dist/**", "**/coverage/**", "**/schemas/**", "**/drizzle/**"],
+    // bench/tasks: the apps agents work on, fixtures rather than our code.
+    ignores: ["**/dist/**", "**/coverage/**", "**/schemas/**", "**/drizzle/**", "bench/tasks/**"],
   },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,

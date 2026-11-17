@@ -1,0 +1,5 @@
+# Agent CLIs the benchmark runs, pinned: Harbor installs this version in the sandbox. A version is
+# at least 3 days old when pinned (the same rule as pnpm's minimumReleaseAge).
+claude-code: 2.1.325
+codex: 0.169.0
+opencode: 1.19.5

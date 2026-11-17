@@ -1,0 +1,5 @@
+# Distroless runtime: no shell for a HEALTHCHECK, everything else right.
+works: true
+pass: [fq-image-names, base-digest-pinned, containerfile-name, containerignore, non-root-user, no-secret-in-image, exec-form-entrypoint, multi-stage]
+fail: [healthcheck]
+na: [numeric-user, group0-writable]

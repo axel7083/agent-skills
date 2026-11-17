@@ -1,0 +1,5 @@
+# World-writable data directory: it works under an arbitrary UID, without a HEALTHCHECK.
+works: true
+pass: [fq-image-names, base-digest-pinned, containerfile-name, containerignore, numeric-user, group0-writable, non-root-user, exec-form-entrypoint]
+fail: [healthcheck]
+na: [multi-stage, no-secret-in-image]

@@ -1,0 +1,22 @@
+# What the containerfile-best-practices skill (#12) claims to fix, and what it must not break.
+skill: containerfile-best-practices
+tasks:
+  - containerfile-node-api
+  - containerfile-python-api
+  - containerfile-go-api
+  - containerfile-static-site
+  - containerfile-repair-node
+  - openshift-node-notes
+targets:
+  - fq-image-names
+  - base-digest-pinned
+  - healthcheck
+  - containerfile-name
+  - containerignore
+  - numeric-user
+  - group0-writable
+controls:
+  - non-root-user
+  - multi-stage
+  - no-secret-in-image
+  - exec-form-entrypoint

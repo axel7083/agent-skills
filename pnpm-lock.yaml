@@ -263,6 +263,9 @@ catalogs:
     vitest:
       specifier: 5.0.4
       version: 5.0.4
+    yaml:
+      specifier: 2.9.1
+      version: 2.9.1
     zod:
       specifier: 4.6.6
       version: 4.6.6
@@ -326,6 +329,18 @@ importers:
       esbuild:
         specifier: 'catalog:'
         version: 0.28.2
+
+  bench/runner:
+    dependencies:
+      '@podman-desktop/bench-contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.1
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.6
 
   bench/server:
     dependencies:

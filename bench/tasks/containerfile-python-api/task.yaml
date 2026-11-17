@@ -1,0 +1,6 @@
+# The Containerfile of a Python (Flask) API, from scratch.
+gate: image
+app: { language: python, port: 8080, needsBuild: false }
+probe: { path: /health, status: 200, body: ok }
+canary: { file: .env, value: acb-canary-2b8e5d04 }
+agentTimeoutSec: 900
