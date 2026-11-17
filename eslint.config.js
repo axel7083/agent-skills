@@ -18,13 +18,15 @@
 
 // @ts-check
 import eslint from "@eslint/js";
+import podmanDesktop from "@podman-desktop/eslint-config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(
-  {
-    // bench/tasks: the apps agents work on, fixtures rather than our code.
-    ignores: ["**/dist/**", "**/dist-scripts/**", "bench/server-client/src/**", "**/coverage/**", "**/schemas/**", "**/drizzle/**", "bench/tasks/**"],
-  },
+export default defineConfig(
+  // Generated files, and bench/tasks: the apps agents work on, fixtures rather than our code.
+  globalIgnores(["**/dist/**", "**/dist-scripts/**", "bench/server-client/src/**", "**/coverage/**", "**/schemas/**", "**/drizzle/**", "bench/tasks/**"]),
+  // Podman Desktop's shared rules (empty for now); this repository's own rules follow until they move there.
+  podmanDesktop,
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,

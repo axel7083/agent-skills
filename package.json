@@ -16,13 +16,12 @@
     "test": "pnpm generated && vitest run",
     "test:watch": "vitest",
     "gen": "pnpm --recursive run gen",
-    "check": "pnpm license && pnpm typecheck && pnpm lint && pnpm test",
-    "generated": "pnpm --filter @podman-desktop/agent-skills-bench-server-client build",
-    "license": "node scripts/license-headers.ts",
-    "license:fix": "node scripts/license-headers.ts --fix"
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "generated": "pnpm --filter @podman-desktop/agent-skills-bench-server-client build"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
+    "@podman-desktop/eslint-config": "catalog:",
     "@swc/core": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",

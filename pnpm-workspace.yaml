@@ -62,6 +62,8 @@ catalog:
   unplugin-swc: 2.0.0
   "@swc/core": 1.16.22
   # Tooling
+  # Podman Desktop's shared ESLint config: empty for now, rules move there over time.
+  "@podman-desktop/eslint-config": 0.1.0
   typescript: 6.0.3
   "@types/node": 24.19.2
   eslint: 10.12.0

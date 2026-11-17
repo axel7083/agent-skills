@@ -7,7 +7,6 @@
   },
   "include": [
     "eslint.config.js",
-    "vitest.config.ts",
-    "scripts"
+    "vitest.config.ts"
   ]
 }

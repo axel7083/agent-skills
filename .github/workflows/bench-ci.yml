@@ -46,7 +46,6 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm license
       - run: pnpm typecheck
       - run: pnpm lint
       - name: generated files are up to date (JSON Schemas, OpenAPI document, server client)

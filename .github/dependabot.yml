@@ -33,7 +33,7 @@ updates:
       vega:
         patterns: ["vega", "vega-*"]
       lint:
-        patterns: ["eslint", "@eslint/*", "typescript-eslint"]
+        patterns: ["eslint", "@eslint/*", "typescript-eslint", "@podman-desktop/eslint-config"]
 
   # Actions are pinned by commit SHA.
   - package-ecosystem: github-actions

@@ -129,7 +129,6 @@ CI fails when one of them is out of date; regenerate with:
 pnpm --filter @podman-desktop/agent-skills-bench-contracts gen      # JSON Schemas
 pnpm --filter @podman-desktop/agent-skills-bench-server gen         # OpenAPI document
 pnpm --filter @podman-desktop/agent-skills-bench-server-client gen  # client, from the document
-pnpm license:fix                                                    # license headers
 ```
 
 ## Tasks and oracles
