@@ -48,12 +48,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
-      - name: generated files are up to date (JSON Schemas, OpenAPI document, server client)
+      - name: generated files are up to date (OpenAPI document, server client)
         run: |
-          pnpm --filter @podman-desktop/agent-skills-bench-contracts gen
           pnpm --filter @podman-desktop/agent-skills-bench-server gen
           pnpm --filter @podman-desktop/agent-skills-bench-server-client gen
-          git diff --exit-code bench/contracts/schemas bench/server/openapi bench/server-client/src
+          git diff --exit-code bench/server/openapi bench/server-client/src
       - name: migrations match the schema
         run: pnpm --filter @podman-desktop/agent-skills-bench-server db:check
       # Integration tests start Postgres with testcontainers, on the runner's rootless Podman.

@@ -18,12 +18,13 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Slug, Trial } from "@podman-desktop/agent-skills-bench-contracts";
+import { zTrial } from "@podman-desktop/agent-skills-bench-server-client/zod";
 import { z } from "zod";
 import { appendSummary, runArtifacts } from "../github.ts";
 import { ServerClient } from "../server-client.ts";
+import { Slug } from "../tasks.ts";
 
-const GradedShard = z.strictObject({ shard: Slug, attempt: z.int().min(1), trials: z.array(Trial) });
+const GradedShard = z.strictObject({ shard: Slug, attempt: z.int().min(1), trials: z.array(zTrial) });
 
 /** Never published: a gateway key in a trial means the redaction failed somewhere. */
 const KEY_PATTERN = /sk-bf-[0-9a-f-]{20,}/;

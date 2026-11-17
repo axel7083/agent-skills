@@ -21,7 +21,7 @@ import { Arm, CheckId, Harness, ModelId, SemVer, Sha, Slug } from "./ids.ts";
 import { EvalSpec, Trial } from "./trial.ts";
 
 /** One harness × model cell of the matrix. */
-export const Cell = z.strictObject({ harness: Harness, model: ModelId });
+export const Cell = z.strictObject({ harness: Harness, model: ModelId }).meta({ id: "Cell" });
 export type Cell = z.infer<typeof Cell>;
 
 /** `POST /v1/runs`, from the plan job. */
@@ -37,7 +37,7 @@ export const CreateRunRequest = z.strictObject({
   maxUsd: z.number().positive().max(1000),
   /** Bounds each key's lifetime: trials × agent timeout, plus a margin. */
   agentTimeoutMinutes: z.int().min(1).max(60),
-});
+}).meta({ id: "CreateRunRequest" });
 export type CreateRunRequest = z.infer<typeof CreateRunRequest>;
 
 /** One job of the matrix: a cell, an arm and a task, for `trials` trials. */
@@ -47,13 +47,13 @@ export const Shard = z.strictObject({
   model: ModelId,
   arm: Arm,
   task: Slug,
-});
+}).meta({ id: "Shard" });
 export type Shard = z.infer<typeof Shard>;
 
 export const CreateRunResponse = z.strictObject({
   runId: z.uuid(),
   shards: z.array(Shard),
-});
+}).meta({ id: "CreateRunResponse" });
 export type CreateRunResponse = z.infer<typeof CreateRunResponse>;
 
 /** `POST /v1/runs/:run/shards/:shard/key`, from the agent job. */
@@ -67,7 +67,7 @@ export const MintedKey = z.strictObject({
   provider: Slug,
   expiresAt: z.iso.datetime(),
   limitUsd: z.number().positive(),
-});
+}).meta({ id: "MintedKey" });
 export type MintedKey = z.infer<typeof MintedKey>;
 
 /** `POST /v1/runs/:run/trials`, from the complete job: one shard's graded trials. */
@@ -77,7 +77,7 @@ export const UploadTrialsRequest = z.strictObject({
   /** Built by the complete job from the run id, never from the agent's side. */
   artifactId: z.int().positive(),
   trials: z.array(Trial).max(10),
-});
+}).meta({ id: "UploadTrialsRequest" });
 export type UploadTrialsRequest = z.infer<typeof UploadTrialsRequest>;
 
 /** `POST /v1/runs/:run/complete`. */
@@ -85,10 +85,10 @@ export const CompleteRunResponse = z.strictObject({
   reportUrl: z.url(),
   /** For `$GITHUB_STEP_SUMMARY`: numbers and enum values only, no free text from trials. */
   summaryMarkdown: z.string(),
-});
+}).meta({ id: "CompleteRunResponse" });
 export type CompleteRunResponse = z.infer<typeof CompleteRunResponse>;
 
-export const RunStatus = z.enum(["running", "completed", "abandoned"]);
+export const RunStatus = z.enum(["running", "completed", "abandoned"]).meta({ id: "RunStatus" });
 export type RunStatus = z.infer<typeof RunStatus>;
 
 /** A run as the public API lists it. */
@@ -107,7 +107,7 @@ export const RunSummary = z.strictObject({
   costUsd: z.number().nullable(),
   maxUsd: z.number(),
   verdicts: z.strictObject({ helps: z.int(), noEffect: z.int(), hurts: z.int() }).nullable(),
-});
+}).meta({ id: "RunSummary" });
 export type RunSummary = z.infer<typeof RunSummary>;
 
 /** Gateway usage of one shard's key, and how far its trials' own token counts are from it. */
@@ -119,26 +119,26 @@ export const ShardBilling = z.strictObject({
   agentTokens: z.int().nullable(),
   /** Agent-reported tokens differ from the gateway's by more than 5%. */
   tokenMismatch: z.boolean(),
-});
+}).meta({ id: "ShardBilling" });
 export type ShardBilling = z.infer<typeof ShardBilling>;
 
 /** `GET /api/v1/runs`. */
 export const RunList = z.strictObject({
   schemaVersion: z.literal(1),
   runs: z.array(RunSummary),
-});
+}).meta({ id: "RunList" });
 export type RunList = z.infer<typeof RunList>;
 
 export const RunDetail = RunSummary.extend({
   tasks: z.array(Slug),
   shards: z.array(Shard),
   billing: z.array(ShardBilling),
-});
+}).meta({ id: "RunDetail" });
 export type RunDetail = z.infer<typeof RunDetail>;
 
 /** The body of every error the server answers: a code only, the reason stays in its log. */
-export const ErrorBody = z.strictObject({ error: z.string() });
+export const ErrorBody = z.strictObject({ error: z.string() }).meta({ id: "ErrorBody" });
 export type ErrorBody = z.infer<typeof ErrorBody>;
 
-export const Health = z.strictObject({ status: z.literal("ok") });
+export const Health = z.strictObject({ status: z.literal("ok") }).meta({ id: "Health" });
 export type Health = z.infer<typeof Health>;

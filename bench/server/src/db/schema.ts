@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { Arm, CreateRunRequest, Harness, Results, Trial } from "@podman-desktop/agent-skills-bench-contracts";
+import type { Arm, CreateRunRequest, Harness, Results, Trial } from "../contracts/index.ts";
 import { sql } from "drizzle-orm";
 import { bigint, doublePrecision, index, integer, jsonb, pgEnum, pgTableCreator, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 

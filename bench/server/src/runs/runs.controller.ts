@@ -26,7 +26,7 @@ import {
   MintedKey,
   Slug,
   UploadTrialsRequest,
-} from "@podman-desktop/agent-skills-bench-contracts";
+} from "../contracts/index.ts";
 import { CurrentPrincipal, ForStage } from "../auth/oidc.guard.ts";
 import type { Principal } from "../auth/oidc-verifier.ts";
 import { Refused } from "../common/errors.ts";

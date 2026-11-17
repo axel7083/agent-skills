@@ -18,7 +18,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { AgentReported } from "@podman-desktop/agent-skills-bench-contracts";
+import type { AgentReported } from "@podman-desktop/agent-skills-bench-server-client";
 import { z } from "zod";
 
 /** The fields of Harbor's `result.json` we read. `n_input_tokens` includes cached tokens. */

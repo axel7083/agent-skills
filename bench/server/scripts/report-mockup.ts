@@ -18,15 +18,17 @@
 
 /**
  * Renders the report on invented data, to review the charts before any LLM money is spent:
- * `pnpm --filter @podman-desktop/agent-skills-bench-report mockup`, then open dist/mockup/index.html through a
+ * `pnpm --filter @podman-desktop/agent-skills-bench-report build && pnpm --filter @podman-desktop/agent-skills-bench-server mockup`,
+ * then open dist-mockup/index.html through a
  * local server (the page's CSP only loads same-origin scripts).
  *
  * The three invented models tell the stories the report must make readable: a frontier model that
  * already does well and gets cheaper, a weaker model that gets much better, and a model the skill
  * barely reaches and that breaks a control practice.
  */
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { cp, mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   aggregate,
   type CheckResult,
@@ -34,9 +36,8 @@ import {
   type Harness,
   type PublishedTrial,
   seededRandom,
-} from "@podman-desktop/agent-skills-bench-contracts";
-import { renderReportHtml } from "../src/html.ts";
-import { bundle } from "./bundle.ts";
+} from "../src/contracts/index.ts";
+import { renderReportHtml } from "@podman-desktop/agent-skills-bench-report";
 
 const spec: EvalSpec = {
   skill: "containerfile-best-practices",
@@ -203,7 +204,9 @@ function trials(): PublishedTrial[] {
   return out;
 }
 
-const outDir = join(import.meta.dirname, "..", "dist", "mockup");
+const outDir = join(import.meta.dirname, "..", "dist-mockup");
+/** The report's bundle (bench/report/dist/assets): build the report first. */
+const assets = join(dirname(fileURLToPath(import.meta.resolve("@podman-desktop/agent-skills-bench-report"))), "..", "dist", "assets");
 const data = trials();
 const results = aggregate({
   spec,
@@ -215,10 +218,10 @@ const results = aggregate({
   checkTitles,
 });
 
-await bundle(outDir);
+await mkdir(outDir, { recursive: true });
+await cp(assets, outDir, { recursive: true });
 await writeFile(join(outDir, "results.json"), `${JSON.stringify(results, null, 2)}\n`);
 await writeFile(join(outDir, "trials.ndjson"), data.map((trial) => JSON.stringify(trial)).join("\n") + "\n");
-await mkdir(outDir, { recursive: true });
 await writeFile(
   join(outDir, "index.html"),
   renderReportHtml({ results, trials: data, scriptUrl: "report.js", styleUrl: "report.css", synthetic: true }),

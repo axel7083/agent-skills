@@ -25,12 +25,12 @@ export const Interval = z.strictObject({
   estimate: z.number(),
   low: z.number(),
   high: z.number(),
-});
+}).meta({ id: "Interval" });
 export type Interval = z.infer<typeof Interval>;
 
 const Rate = z.number().min(0).max(1);
 
-export const Verdict = z.enum(["helps", "no-effect", "hurts"]);
+export const Verdict = z.enum(["helps", "no-effect", "hurts"]).meta({ id: "Verdict" });
 export type Verdict = z.infer<typeof Verdict>;
 
 /** One arm of one model, over every task of the evaluation. */
@@ -48,7 +48,7 @@ export const ArmSummary = z.strictObject({
   costPerSuccessUsd: z.number().nullable(),
   /** Share of trials that loaded the skill; null in the `without` arm. */
   triggered: Rate.nullable(),
-});
+}).meta({ id: "ArmSummary" });
 export type ArmSummary = z.infer<typeof ArmSummary>;
 
 const ArmRate = z.strictObject({ rate: Rate.nullable(), n: z.int().nonnegative() });
@@ -58,7 +58,7 @@ export const CheckRate = z.strictObject({
   role: z.enum(["target", "control"]),
   without: ArmRate,
   with: ArmRate,
-});
+}).meta({ id: "CheckRate" });
 export type CheckRate = z.infer<typeof CheckRate>;
 
 export const TaskDelta = z.strictObject({
@@ -66,7 +66,7 @@ export const TaskDelta = z.strictObject({
   target: z.strictObject({ without: Rate.nullable(), with: Rate.nullable() }),
   /** Δ pass rate per check, null where the check never applied in one of the arms. */
   checks: z.record(CheckId, z.number().nullable()),
-});
+}).meta({ id: "TaskDelta" });
 export type TaskDelta = z.infer<typeof TaskDelta>;
 
 /** `with`-arm trials by whether the skill was loaded, and whether the trial succeeded. */
@@ -74,7 +74,7 @@ export const Trigger = z.strictObject({
   loadedSuccess: z.int().nonnegative(),
   loadedFailure: z.int().nonnegative(),
   notLoaded: z.int().nonnegative(),
-});
+}).meta({ id: "Trigger" });
 export type Trigger = z.infer<typeof Trigger>;
 
 export const ModelResult = z.strictObject({
@@ -100,7 +100,7 @@ export const ModelResult = z.strictObject({
   trigger: Trigger,
   checks: z.array(CheckRate),
   tasks: z.array(TaskDelta),
-});
+}).meta({ id: "ModelResult" });
 export type ModelResult = z.infer<typeof ModelResult>;
 
 export const Results = z.strictObject({
@@ -127,5 +127,5 @@ export const Results = z.strictObject({
     costUsd: z.number(),
     maxUsd: z.number().nullable(),
   }),
-});
+}).meta({ id: "Results" });
 export type Results = z.infer<typeof Results>;

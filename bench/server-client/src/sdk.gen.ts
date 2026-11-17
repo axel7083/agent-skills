@@ -4,8 +4,8 @@ import * as z from 'zod';
 
 import { client } from './client.gen.ts';
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client/index.ts';
-import type { CompleteRunData, CompleteRunErrors, CompleteRunResponses, CreateRunData, CreateRunErrors, CreateRunResponses, MintKeyData, MintKeyErrors, MintKeyResponses, RevokeKeyData, RevokeKeyErrors, RevokeKeyResponses, UploadTrialsData, UploadTrialsErrors, UploadTrialsResponses } from './types.gen.ts';
-import { zCompleteRunPath, zCompleteRunResponse, zCreateRunBody, zCreateRunResponse, zMintKeyPath, zMintKeyResponse, zRevokeKeyPath, zRevokeKeyResponse, zUploadTrialsBody, zUploadTrialsPath, zUploadTrialsResponse } from './zod.gen.ts';
+import type { CompleteRunData, CompleteRunErrors, CompleteRunResponses, CreateRunData, CreateRunErrors, CreateRunResponses, GetReportData, GetReportResponses, GetRunData, GetRunErrors, GetRunResponses, GetRunResultsData, GetRunResultsErrors, GetRunResultsResponses, GetRunTrialsData, GetRunTrialsErrors, GetRunTrialsResponses, GetSchemaData, GetSchemaErrors, GetSchemaResponses, ListRunsData, ListRunsErrors, ListRunsResponses, MintKeyData, MintKeyErrors, MintKeyResponses, RevokeKeyData, RevokeKeyErrors, RevokeKeyResponses, UploadTrialsData, UploadTrialsErrors, UploadTrialsResponses } from './types.gen.ts';
+import { zCompleteRunPath, zCompleteRunResponse2, zCreateRunBody, zCreateRunResponse2, zGetReportPath, zGetRunPath, zGetRunResponse, zGetRunResultsPath, zGetRunResultsResponse, zGetRunTrialsPath, zGetRunTrialsResponse, zGetSchemaPath, zListRunsResponse, zMintKeyPath, zMintKeyResponse, zRevokeKeyPath, zRevokeKeyResponse, zUploadTrialsBody, zUploadTrialsPath, zUploadTrialsResponse } from './zod.gen.ts';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -30,7 +30,7 @@ export const createRun = <ThrowOnError extends boolean = false>(options: Options
         path: z.never().optional(),
         query: z.never().optional()
     }).parseAsync(data),
-    responseValidator: async (data) => await zCreateRunResponse.parseAsync(data),
+    responseValidator: async (data) => await zCreateRunResponse2.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/runs',
     ...options,
@@ -98,8 +98,92 @@ export const completeRun = <ThrowOnError extends boolean = false>(options: Optio
         path: zCompleteRunPath,
         query: z.never().optional()
     }).parseAsync(data),
-    responseValidator: async (data) => await zCompleteRunResponse.parseAsync(data),
+    responseValidator: async (data) => await zCompleteRunResponse2.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/runs/{run}/complete',
+    ...options
+});
+
+/**
+ * Every run, newest first
+ */
+export const listRuns = <ThrowOnError extends boolean = false>(options?: Options<ListRunsData, ThrowOnError>): RequestResult<ListRunsResponses, ListRunsErrors, ThrowOnError> => (options?.client ?? client).get<ListRunsResponses, ListRunsErrors, ThrowOnError>({
+    requestValidator: async (data) => await z.object({
+        body: z.never().optional(),
+        path: z.never().optional(),
+        query: z.never().optional()
+    }).parseAsync(data),
+    responseValidator: async (data) => await zListRunsResponse.parseAsync(data),
+    url: '/api/v1/runs',
+    ...options
+});
+
+/**
+ * A run: its inputs, shards and gateway billing
+ */
+export const getRun = <ThrowOnError extends boolean = false>(options: Options<GetRunData, ThrowOnError>): RequestResult<GetRunResponses, GetRunErrors, ThrowOnError> => (options.client ?? client).get<GetRunResponses, GetRunErrors, ThrowOnError>({
+    requestValidator: async (data) => await z.object({
+        body: z.never().optional(),
+        path: zGetRunPath,
+        query: z.never().optional()
+    }).parseAsync(data),
+    responseValidator: async (data) => await zGetRunResponse.parseAsync(data),
+    url: '/api/v1/runs/{run}',
+    ...options
+});
+
+/**
+ * A completed run's trials, one JSON document per line
+ *
+ * Each line validates against /api/v1/schema/v1/published-trial.json.
+ */
+export const getRunTrials = <ThrowOnError extends boolean = false>(options: Options<GetRunTrialsData, ThrowOnError>): RequestResult<GetRunTrialsResponses, GetRunTrialsErrors, ThrowOnError> => (options.client ?? client).get<GetRunTrialsResponses, GetRunTrialsErrors, ThrowOnError>({
+    requestValidator: async (data) => await z.object({
+        body: z.never().optional(),
+        path: zGetRunTrialsPath,
+        query: z.never().optional()
+    }).parseAsync(data),
+    responseValidator: async (data) => await zGetRunTrialsResponse.parseAsync(data),
+    url: '/api/v1/runs/{run}/trials',
+    ...options
+});
+
+/**
+ * A completed run's aggregates: what the report shows
+ */
+export const getRunResults = <ThrowOnError extends boolean = false>(options: Options<GetRunResultsData, ThrowOnError>): RequestResult<GetRunResultsResponses, GetRunResultsErrors, ThrowOnError> => (options.client ?? client).get<GetRunResultsResponses, GetRunResultsErrors, ThrowOnError>({
+    requestValidator: async (data) => await z.object({
+        body: z.never().optional(),
+        path: zGetRunResultsPath,
+        query: z.never().optional()
+    }).parseAsync(data),
+    responseValidator: async (data) => await zGetRunResultsResponse.parseAsync(data),
+    url: '/api/v1/runs/{run}/results',
+    ...options
+});
+
+/**
+ * JSON Schema of a published document
+ */
+export const getSchema = <ThrowOnError extends boolean = false>(options: Options<GetSchemaData, ThrowOnError>): RequestResult<GetSchemaResponses, GetSchemaErrors, ThrowOnError> => (options.client ?? client).get<GetSchemaResponses, GetSchemaErrors, ThrowOnError>({
+    requestValidator: async (data) => await z.object({
+        body: z.never().optional(),
+        path: zGetSchemaPath,
+        query: z.never().optional()
+    }).parseAsync(data),
+    url: '/api/v1/schema/v1/{name}',
+    ...options
+});
+
+/**
+ * A completed run's report page
+ */
+export const getReport = <ThrowOnError extends boolean = false>(options: Options<GetReportData, ThrowOnError>): RequestResult<GetReportResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetReportResponses, unknown, ThrowOnError>({
+    requestValidator: async (data) => await z.object({
+        body: z.never().optional(),
+        path: zGetReportPath,
+        query: z.never().optional()
+    }).parseAsync(data),
+    url: '/runs/{run}',
     ...options
 });

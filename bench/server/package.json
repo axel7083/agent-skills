@@ -16,7 +16,8 @@
     "start": "node --enable-source-maps dist/main.js",
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
-    "gen": "tsc -p tsconfig.scripts.json && node --conditions=@podman-desktop/agent-skills-source dist-scripts/scripts/emit-openapi.js"
+    "gen": "tsc -p tsconfig.scripts.json --noCheck && node --conditions=@podman-desktop/agent-skills-source dist-scripts/scripts/emit-openapi.js",
+    "mockup": "node --conditions=@podman-desktop/agent-skills-source scripts/report-mockup.ts"
   },
   "dependencies": {
     "@nestjs/common": "catalog:",
@@ -26,7 +27,6 @@
     "@nestjs/schedule": "catalog:",
     "@nestjs/swagger": "catalog:",
     "@nestjs/throttler": "catalog:",
-    "@podman-desktop/agent-skills-bench-contracts": "workspace:*",
     "@podman-desktop/agent-skills-bench-report": "workspace:*",
     "drizzle-orm": "catalog:",
     "jose": "catalog:",
@@ -45,6 +45,8 @@
     "@testcontainers/postgresql": "catalog:",
     "@types/pg": "catalog:",
     "drizzle-kit": "catalog:",
-    "msw": "catalog:"
+    "msw": "catalog:",
+    "vega": "catalog:",
+    "vega-lite": "catalog:"
   }
 }

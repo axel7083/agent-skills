@@ -19,7 +19,7 @@
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { MintedKey, Shard } from "@podman-desktop/agent-skills-bench-contracts";
+import type { MintedKey, Shard } from "@podman-desktop/agent-skills-bench-server-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { agentArgs, harborEnvironment, skillArgs } from "../src/harbor.ts";
 import { readTrial } from "../src/trajectory.ts";

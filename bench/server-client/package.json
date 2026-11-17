@@ -13,6 +13,10 @@
     "./client": {
       "types": "./dist/client/index.d.ts",
       "default": "./dist/client/index.js"
+    },
+    "./zod": {
+      "types": "./dist/zod.gen.d.ts",
+      "default": "./dist/zod.gen.js"
     }
   },
   "files": [

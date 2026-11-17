@@ -17,7 +17,7 @@
  ***********************************************************************/
 
 import { describe, expect, it } from "vitest";
-import { bootstrapPairedDelta, median, quantile, seededRandom } from "../src/index.ts";
+import { bootstrapPairedDelta, median, quantile, seededRandom } from "../../../src/contracts/index.ts";
 
 const options = { resamples: 2000, seed: 7, confidence: 0.95 };
 

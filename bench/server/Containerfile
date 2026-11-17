@@ -26,16 +26,14 @@ RUN npm install --global --no-fund --no-audit pnpm@12.18.0
 WORKDIR /src
 # Dependencies first, for layer caching: manifests and the lockfile only.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
-COPY bench/contracts/package.json bench/contracts/
 COPY bench/report/package.json bench/report/
 COPY bench/server/package.json bench/server/
 COPY bench/server-client/package.json bench/server-client/
 RUN pnpm install --frozen-lockfile --filter @podman-desktop/agent-skills-bench-server...
-COPY bench/contracts bench/contracts
+COPY bench/server-client bench/server-client
 COPY bench/report bench/report
 COPY bench/server bench/server
-# The generated client is a test dependency of the server only: not built into the image.
-RUN pnpm --filter @podman-desktop/agent-skills-bench-server... --filter '!@podman-desktop/agent-skills-bench-server-client' run build \
+RUN pnpm --filter @podman-desktop/agent-skills-bench-server... run build \
  && pnpm --filter @podman-desktop/agent-skills-bench-server deploy --prod --legacy /opt/app
 
 FROM quay.io/hummingbird/nodejs:24@sha256:c9640ede7ee86932dfbbbef53a123bcb6c96f0ef51244d38805e426568f9826b

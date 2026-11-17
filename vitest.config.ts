@@ -27,8 +27,6 @@ export default defineConfig({
   ssr: { resolve: { conditions: ["@podman-desktop/agent-skills-source"] } },
   test: {
     projects: [
-      { extends: true, test: { name: "contracts", include: ["bench/contracts/test/**/*.test.ts"] } },
-      { extends: true, test: { name: "report", include: ["bench/report/test/**/*.test.ts"] } },
       { extends: true, test: { name: "runner", include: ["bench/runner/test/**/*.test.ts"] } },
       { extends: true, test: { name: "server", include: ["bench/server/test/unit/**/*.test.ts"] } },
       {

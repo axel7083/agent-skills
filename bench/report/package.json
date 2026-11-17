@@ -17,11 +17,10 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/bundle.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "mockup": "node --conditions=@podman-desktop/agent-skills-source scripts/mockup.ts"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@podman-desktop/agent-skills-bench-contracts": "workspace:*",
+    "@podman-desktop/agent-skills-bench-server-client": "workspace:*",
     "vega": "catalog:",
     "vega-embed": "catalog:",
     "vega-interpreter": "catalog:",

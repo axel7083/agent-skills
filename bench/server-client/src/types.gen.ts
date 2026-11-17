@@ -4,28 +4,310 @@ export type ClientOptions = {
     baseUrl: string;
 };
 
-export type CreateRunData = {
-    body: {
-        spec: {
-            skill: string;
-            tasks: Array<string>;
-            targets: Array<string>;
-            controls: Array<string>;
-        };
-        skillSha: string;
-        skillVersion: string;
-        checkTitles: {
-            [key: string]: string;
-        };
-        cells: Array<{
-            harness: 'claude-code' | 'codex' | 'opencode';
-            model: string;
-        }>;
-        arms: Array<'without' | 'with' | 'bundle'>;
-        trials: number;
-        maxUsd: number;
-        agentTimeoutMinutes: number;
+export type ErrorBody = {
+    error: string;
+};
+
+export type CreateRunRequest = {
+    spec: EvalSpec;
+    skillSha: string;
+    skillVersion: string;
+    checkTitles: {
+        [key: string]: string;
     };
+    cells: Array<Cell>;
+    arms: Array<Arm>;
+    trials: number;
+    maxUsd: number;
+    agentTimeoutMinutes: number;
+};
+
+export type EvalSpec = {
+    skill: string;
+    tasks: Array<string>;
+    targets: Array<string>;
+    controls: Array<string>;
+};
+
+export type Cell = {
+    harness: Harness;
+    model: string;
+};
+
+export type Harness = 'claude-code' | 'codex' | 'opencode';
+
+export type Arm = 'without' | 'with' | 'bundle';
+
+export type CreateRunResponse = {
+    runId: string;
+    shards: Array<Shard>;
+};
+
+export type Shard = {
+    id: string;
+    harness: Harness;
+    model: string;
+    arm: Arm;
+    task: string;
+};
+
+export type MintedKey = {
+    key: string;
+    anthropicBaseUrl: string;
+    openaiBaseUrl: string;
+    provider: string;
+    expiresAt: string;
+    limitUsd: number;
+};
+
+export type UploadTrialsRequest = {
+    shard: string;
+    attempt: number;
+    artifactId: number;
+    trials: Array<Trial>;
+};
+
+export type Trial = {
+    schemaVersion: 1;
+    skill: string;
+    arm: Arm;
+    harness: Harness;
+    model: string;
+    task: string;
+    attempt: number;
+    trial: number;
+    works: boolean;
+    failureClass: FailureClass;
+    checks: {
+        [key: string]: CheckResult;
+    };
+    agentSeconds: number;
+    agentReported: AgentReported;
+    graderCommit: string;
+    transcriptPath: string;
+};
+
+export type FailureClass = 'none' | 'no-artifact' | 'build' | 'start' | 'probe' | 'timeout' | 'infra';
+
+export type CheckResult = {
+    status: CheckStatus;
+    evidence: string;
+};
+
+export type CheckStatus = 'pass' | 'fail' | 'na' | 'error';
+
+export type AgentReported = {
+    triggered: boolean;
+    tokens: Tokens;
+    turns: number;
+    toolCalls: number;
+};
+
+export type Tokens = {
+    input: number;
+    cached: number;
+    output: number;
+};
+
+export type CompleteRunResponse = {
+    reportUrl: string;
+    summaryMarkdown: string;
+};
+
+export type RunList = {
+    schemaVersion: 1;
+    runs: Array<RunSummary>;
+};
+
+export type RunSummary = {
+    runId: string;
+    githubRunId: number;
+    status: RunStatus;
+    createdAt: string;
+    completedAt: string | null;
+    skill: string;
+    skillSha: string;
+    skillVersion: string;
+    cells: Array<Cell>;
+    arms: Array<Arm>;
+    trials: number;
+    costUsd: number | null;
+    maxUsd: number;
+    verdicts: {
+        helps: number;
+        noEffect: number;
+        hurts: number;
+    } | null;
+};
+
+export type RunStatus = 'running' | 'completed' | 'abandoned';
+
+export type RunDetail = {
+    runId: string;
+    githubRunId: number;
+    status: RunStatus;
+    createdAt: string;
+    completedAt: string | null;
+    skill: string;
+    skillSha: string;
+    skillVersion: string;
+    cells: Array<Cell>;
+    arms: Array<Arm>;
+    trials: number;
+    costUsd: number | null;
+    maxUsd: number;
+    verdicts: {
+        helps: number;
+        noEffect: number;
+        hurts: number;
+    } | null;
+    tasks: Array<string>;
+    shards: Array<Shard>;
+    billing: Array<ShardBilling>;
+};
+
+export type ShardBilling = {
+    shard: string;
+    attempt: number;
+    costUsd: number | null;
+    gatewayTokens: number | null;
+    agentTokens: number | null;
+    tokenMismatch: boolean;
+};
+
+export type PublishedTrial = {
+    schemaVersion: 1;
+    skill: string;
+    arm: Arm;
+    harness: Harness;
+    model: string;
+    task: string;
+    attempt: number;
+    trial: number;
+    works: boolean;
+    failureClass: FailureClass;
+    checks: {
+        [key: string]: CheckResult;
+    };
+    agentSeconds: number;
+    agentReported: AgentReported;
+    graderCommit: string;
+    transcriptPath: string;
+    shard: string;
+    costUsd: number;
+    artifactUrl: string;
+};
+
+export type Results = {
+    schemaVersion: 1;
+    skill: string;
+    skillSha: string;
+    skillVersion: string;
+    tasks: Array<string>;
+    targets: Array<string>;
+    controls: Array<string>;
+    checkTitles: {
+        [key: string]: string;
+    };
+    bootstrap: {
+        resamples: number;
+        seed: number;
+        confidence: number;
+    };
+    models: Array<ModelResult>;
+    overall: {
+        verdicts: {
+            helps: number;
+            noEffect: number;
+            hurts: number;
+        };
+        target: Interval | null;
+        tokensPct: number | null;
+        triggered: number | null;
+        costUsd: number;
+        maxUsd: number | null;
+    };
+};
+
+export type ModelResult = {
+    harness: Harness;
+    model: string;
+    without: ArmSummary;
+    with: ArmSummary;
+    delta: {
+        target: Interval | null;
+        control: Interval | null;
+        works: Interval | null;
+        normalizedGain: number | null;
+        tokensPct: number | null;
+        costUsd: number;
+        turns: number;
+        seconds: number;
+    };
+    verdict: Verdict | null;
+    regression: boolean;
+    trigger: Trigger;
+    checks: Array<CheckRate>;
+    tasks: Array<TaskDelta>;
+};
+
+export type ArmSummary = {
+    trials: number;
+    works: number | null;
+    target: number | null;
+    control: number | null;
+    successes: number;
+    tokens: {
+        median: number;
+        p90: number;
+    };
+    turns: number;
+    seconds: number;
+    costUsd: number;
+    costPerSuccessUsd: number | null;
+    triggered: number | null;
+};
+
+export type Interval = {
+    estimate: number;
+    low: number;
+    high: number;
+};
+
+export type Verdict = 'helps' | 'no-effect' | 'hurts';
+
+export type Trigger = {
+    loadedSuccess: number;
+    loadedFailure: number;
+    notLoaded: number;
+};
+
+export type CheckRate = {
+    check: string;
+    role: 'target' | 'control';
+    without: {
+        rate: number | null;
+        n: number;
+    };
+    with: {
+        rate: number | null;
+        n: number;
+    };
+};
+
+export type TaskDelta = {
+    task: string;
+    target: {
+        without: number | null;
+        with: number | null;
+    };
+    checks: {
+        [key: string]: number | null;
+    };
+};
+
+export type CreateRunData = {
+    body: CreateRunRequest;
     path?: never;
     query?: never;
     url: '/v1/runs';
@@ -35,51 +317,32 @@ export type CreateRunErrors = {
     /**
      * OIDC token missing, invalid, or not from the bench workflow on main
      */
-    401: {
-        error: string;
-    };
+    401: ErrorBody;
     /**
      * The daily cap is spent
      */
-    402: {
-        error: string;
-    };
+    402: ErrorBody;
     /**
      * Another stage's token, another workflow run, or an actor not allowed
      */
-    403: {
-        error: string;
-    };
+    403: ErrorBody;
     /**
      * Another run is still running
      */
-    409: {
-        error: string;
-    };
+    409: ErrorBody;
     /**
      * A model without a price, too many shards, or a missing arm
      */
-    422: {
-        error: string;
-    };
+    422: ErrorBody;
 };
 
 export type CreateRunError = CreateRunErrors[keyof CreateRunErrors];
 
 export type CreateRunResponses = {
-    201: {
-        runId: string;
-        shards: Array<{
-            id: string;
-            harness: 'claude-code' | 'codex' | 'opencode';
-            model: string;
-            arm: 'without' | 'with' | 'bundle';
-            task: string;
-        }>;
-    };
+    201: CreateRunResponse;
 };
 
-export type CreateRunResponse = CreateRunResponses[keyof CreateRunResponses];
+export type CreateRunResponse2 = CreateRunResponses[keyof CreateRunResponses];
 
 export type RevokeKeyData = {
     body?: never;
@@ -101,21 +364,15 @@ export type RevokeKeyErrors = {
     /**
      * OIDC token missing, invalid, or not from the bench workflow on main
      */
-    401: {
-        error: string;
-    };
+    401: ErrorBody;
     /**
      * Another stage's token, another workflow run, or an actor not allowed
      */
-    403: {
-        error: string;
-    };
+    403: ErrorBody;
     /**
      * No key for this shard and attempt
      */
-    404: {
-        error: string;
-    };
+    404: ErrorBody;
 };
 
 export type RevokeKeyError = RevokeKeyErrors[keyof RevokeKeyErrors];
@@ -149,81 +406,31 @@ export type MintKeyErrors = {
     /**
      * OIDC token missing, invalid, or not from the bench workflow on main
      */
-    401: {
-        error: string;
-    };
+    401: ErrorBody;
     /**
      * The run's or the daily cap is spent
      */
-    402: {
-        error: string;
-    };
+    402: ErrorBody;
     /**
      * Another stage's token, another workflow run, or an actor not allowed
      */
-    403: {
-        error: string;
-    };
+    403: ErrorBody;
     /**
      * This shard already has a key for this attempt, or the run is closed
      */
-    409: {
-        error: string;
-    };
+    409: ErrorBody;
 };
 
 export type MintKeyError = MintKeyErrors[keyof MintKeyErrors];
 
 export type MintKeyResponses = {
-    201: {
-        key: string;
-        anthropicBaseUrl: string;
-        openaiBaseUrl: string;
-        provider: string;
-        expiresAt: string;
-        limitUsd: number;
-    };
+    201: MintedKey;
 };
 
 export type MintKeyResponse = MintKeyResponses[keyof MintKeyResponses];
 
 export type UploadTrialsData = {
-    body: {
-        shard: string;
-        attempt: number;
-        artifactId: number;
-        trials: Array<{
-            schemaVersion: 1;
-            skill: string;
-            arm: 'without' | 'with' | 'bundle';
-            harness: 'claude-code' | 'codex' | 'opencode';
-            model: string;
-            task: string;
-            attempt: number;
-            trial: number;
-            works: boolean;
-            failureClass: 'none' | 'no-artifact' | 'build' | 'start' | 'probe' | 'timeout' | 'infra';
-            checks: {
-                [key: string]: {
-                    status: 'pass' | 'fail' | 'na' | 'error';
-                    evidence: string;
-                };
-            };
-            agentSeconds: number;
-            agentReported: {
-                triggered: boolean;
-                tokens: {
-                    input: number;
-                    cached: number;
-                    output: number;
-                };
-                turns: number;
-                toolCalls: number;
-            };
-            graderCommit: string;
-            transcriptPath: string;
-        }>;
-    };
+    body: UploadTrialsRequest;
     path: {
         /**
          * The run's id, from createRun
@@ -238,21 +445,15 @@ export type UploadTrialsErrors = {
     /**
      * OIDC token missing, invalid, or not from the bench workflow on main
      */
-    401: {
-        error: string;
-    };
+    401: ErrorBody;
     /**
      * Another stage's token, another workflow run, or an actor not allowed
      */
-    403: {
-        error: string;
-    };
+    403: ErrorBody;
     /**
      * A trial that doesn't belong to the shard
      */
-    422: {
-        error: string;
-    };
+    422: ErrorBody;
 };
 
 export type UploadTrialsError = UploadTrialsErrors[keyof UploadTrialsErrors];
@@ -282,24 +483,168 @@ export type CompleteRunErrors = {
     /**
      * OIDC token missing, invalid, or not from the bench workflow on main
      */
-    401: {
-        error: string;
-    };
+    401: ErrorBody;
     /**
      * Another stage's token, another workflow run, or an actor not allowed
      */
-    403: {
-        error: string;
-    };
+    403: ErrorBody;
 };
 
 export type CompleteRunError = CompleteRunErrors[keyof CompleteRunErrors];
 
 export type CompleteRunResponses = {
-    200: {
-        reportUrl: string;
-        summaryMarkdown: string;
-    };
+    200: CompleteRunResponse;
 };
 
-export type CompleteRunResponse = CompleteRunResponses[keyof CompleteRunResponses];
+export type CompleteRunResponse2 = CompleteRunResponses[keyof CompleteRunResponses];
+
+export type ListRunsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/runs';
+};
+
+export type ListRunsErrors = {
+    /**
+     * Too many requests
+     */
+    429: ErrorBody;
+};
+
+export type ListRunsError = ListRunsErrors[keyof ListRunsErrors];
+
+export type ListRunsResponses = {
+    200: RunList;
+};
+
+export type ListRunsResponse = ListRunsResponses[keyof ListRunsResponses];
+
+export type GetRunData = {
+    body?: never;
+    path: {
+        /**
+         * A run id
+         */
+        run: string;
+    };
+    query?: never;
+    url: '/api/v1/runs/{run}';
+};
+
+export type GetRunErrors = {
+    404: ErrorBody;
+    /**
+     * Too many requests
+     */
+    429: ErrorBody;
+};
+
+export type GetRunError = GetRunErrors[keyof GetRunErrors];
+
+export type GetRunResponses = {
+    200: RunDetail;
+};
+
+export type GetRunResponse = GetRunResponses[keyof GetRunResponses];
+
+export type GetRunTrialsData = {
+    body?: never;
+    path: {
+        /**
+         * A run id
+         */
+        run: string;
+    };
+    query?: never;
+    url: '/api/v1/runs/{run}/trials';
+};
+
+export type GetRunTrialsErrors = {
+    404: ErrorBody;
+    /**
+     * Too many requests
+     */
+    429: ErrorBody;
+};
+
+export type GetRunTrialsError = GetRunTrialsErrors[keyof GetRunTrialsErrors];
+
+export type GetRunTrialsResponses = {
+    /**
+     * NDJSON: one PublishedTrial per line
+     */
+    200: PublishedTrial;
+};
+
+export type GetRunTrialsResponse = GetRunTrialsResponses[keyof GetRunTrialsResponses];
+
+export type GetRunResultsData = {
+    body?: never;
+    path: {
+        /**
+         * A run id
+         */
+        run: string;
+    };
+    query?: never;
+    url: '/api/v1/runs/{run}/results';
+};
+
+export type GetRunResultsErrors = {
+    404: ErrorBody;
+    /**
+     * Too many requests
+     */
+    429: ErrorBody;
+};
+
+export type GetRunResultsError = GetRunResultsErrors[keyof GetRunResultsErrors];
+
+export type GetRunResultsResponses = {
+    200: Results;
+};
+
+export type GetRunResultsResponse = GetRunResultsResponses[keyof GetRunResultsResponses];
+
+export type GetSchemaData = {
+    body?: never;
+    path: {
+        name: 'run.json' | 'run-summary.json' | 'trial.json' | 'published-trial.json' | 'results.json' | 'eval.json';
+    };
+    query?: never;
+    url: '/api/v1/schema/v1/{name}';
+};
+
+export type GetSchemaErrors = {
+    404: ErrorBody;
+    /**
+     * Too many requests
+     */
+    429: ErrorBody;
+};
+
+export type GetSchemaError = GetSchemaErrors[keyof GetSchemaErrors];
+
+export type GetSchemaResponses = {
+    /**
+     * A JSON Schema (draft 2020-12)
+     */
+    200: unknown;
+};
+
+export type GetReportData = {
+    body?: never;
+    path: {
+        run: string;
+    };
+    query?: never;
+    url: '/runs/{run}';
+};
+
+export type GetReportResponses = {
+    /**
+     * HTML
+     */
+    200: unknown;
+};

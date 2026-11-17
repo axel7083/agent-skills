@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { Arm, EvalSpec, PublishedTrial } from "../src/index.ts";
+import type { Arm, EvalSpec, PublishedTrial } from "../../../src/contracts/index.ts";
 
 export const SHA = "0123456789abcdef0123456789abcdef01234567";
 

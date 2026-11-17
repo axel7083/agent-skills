@@ -18,7 +18,8 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Cell, type CreateRunRequest } from "@podman-desktop/agent-skills-bench-contracts";
+import { type CreateRunRequest } from "@podman-desktop/agent-skills-bench-server-client";
+import { zCell } from "@podman-desktop/agent-skills-bench-server-client/zod";
 import { parse } from "yaml";
 import { z } from "zod";
 import { run } from "../exec.ts";
@@ -52,7 +53,7 @@ export async function plan(options: PlanOptions): Promise<void> {
     skillSha: tree.stdout.trim(),
     skillVersion: frontMatter.metadata.version,
     checkTitles: Object.fromEntries([...spec.targets, ...spec.controls].map((check) => [check, CHECK_TITLES[check] ?? check])),
-    cells: z.array(Cell).parse(JSON.parse(options.cells)),
+    cells: z.array(zCell).parse(JSON.parse(options.cells)),
     arms: ["without", "with"],
     trials: options.trials,
     maxUsd: options.maxUsd,

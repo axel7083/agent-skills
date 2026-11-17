@@ -22,7 +22,7 @@ import type {
   CreateRunResponse,
   MintedKey,
   UploadTrialsRequest,
-} from "@podman-desktop/agent-skills-bench-contracts";
+} from "@podman-desktop/agent-skills-bench-server-client";
 import { completeRun, createRun, mintKey, revokeKey, uploadTrials } from "@podman-desktop/agent-skills-bench-server-client";
 import { createClient } from "@podman-desktop/agent-skills-bench-server-client/client";
 import { oidcToken } from "./github.ts";

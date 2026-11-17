@@ -28,7 +28,7 @@ import {
   RunList,
   RunSummary,
   Trial,
-} from "@podman-desktop/agent-skills-bench-contracts";
+} from "../contracts/index.ts";
 import { z } from "zod";
 import { NotFound } from "../common/errors.ts";
 import { RunsService } from "../runs/runs.service.ts";
@@ -83,7 +83,8 @@ export class ApiController {
   })
   @ApiParam(RUN)
   @ApiProduces("application/x-ndjson")
-  @ApiResponse({ status: 200, description: "NDJSON, one PublishedTrial per line" })
+  // Each line validates against PublishedTrial: declared as the response's schema so it is a named component.
+  @ApiResponse({ status: 200, description: "NDJSON: one PublishedTrial per line", standardSchema: PublishedTrial })
   @ApiResponse({ status: 404, standardSchema: ErrorBody })
   async trials(@Param("run", new ParseUUIDPipe()) run: string): Promise<string> {
     const trials = await this.runs.trials(run);

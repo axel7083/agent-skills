@@ -1,9 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["es2025", "dom", "dom.iterable"],
+    "lib": [
+      "es2025",
+      "dom",
+      "dom.iterable"
+    ],
     "rootDir": ".",
     "noEmit": true
   },
-  "include": ["src", "test", "scripts"]
+  "include": [
+    "src",
+    "scripts"
+  ]
 }

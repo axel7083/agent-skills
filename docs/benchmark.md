@@ -48,8 +48,8 @@ Each completed run has a page, `/runs/<run id>`, built from the published data:
 6. **Was the skill loaded?** Loaded and succeeded, loaded and failed, not loaded.
 7. Drill-down: Δ per task and check.
 
-Every chart has a table view. `pnpm --filter @podman-desktop/agent-skills-bench-report mockup` renders the page
-on invented data.
+Every chart has a table view. `pnpm --filter @podman-desktop/agent-skills-bench-report build`, then
+`pnpm --filter @podman-desktop/agent-skills-bench-server mockup`, renders the page on invented data.
 
 ## Raw data
 
@@ -88,9 +88,8 @@ flowchart LR
 
 | Package | Role |
 |---|---|
-| `bench/contracts` | zod types shared by both sides (trial, results, API), the statistics |
-| `bench/server` | NestJS on `@nestjs/platform-node`, Drizzle + Postgres: runs, keys, trials, results, report, API; its OpenAPI document (`@nestjs/swagger`, schemas from the contracts' zod schemas) in `bench/server/openapi/` |
-| `bench/server-client` | The server's client, generated from that document by `@hey-api/openapi-ts` (fetch client, zod validation both ways) |
+| `bench/server` | NestJS on `@nestjs/platform-node`, Drizzle + Postgres: runs, keys, trials, results, report, API. Its zod schemas (`src/contracts`) are the source of truth: requests are validated with them, and its OpenAPI document (`@nestjs/swagger`, in `bench/server/openapi/`) is generated from them, every schema a named component |
+| `bench/server-client` | Generated from that document by `@hey-api/openapi-ts`: the client, the types (`Trial`, `Results`…) and their zod validators. The runner and the report depend on it, never on the server's code |
 | `bench/report` | Vega-Lite charts and the report page |
 | `bench/runner` | The workflow's CLI: `plan`, `agent` (Harbor), `grade`, `complete`, `oracles` |
 | `bench/tasks` | Task apps, specs and oracles |
@@ -126,7 +125,6 @@ flowchart LR
 CI fails when one of them is out of date; regenerate with:
 
 ```sh
-pnpm --filter @podman-desktop/agent-skills-bench-contracts gen      # JSON Schemas
 pnpm --filter @podman-desktop/agent-skills-bench-server gen         # OpenAPI document
 pnpm --filter @podman-desktop/agent-skills-bench-server-client gen  # client, from the document
 ```

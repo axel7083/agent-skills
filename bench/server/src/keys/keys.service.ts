@@ -19,7 +19,7 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectDrizzle } from "@nestjs/drizzle";
-import type { MintedKey } from "@podman-desktop/agent-skills-bench-contracts";
+import type { MintedKey } from "../contracts/index.ts";
 import { and, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import { Clock } from "../common/clock.ts";
 import { BudgetExceeded, Conflict, Forbidden, NotFound } from "../common/errors.ts";

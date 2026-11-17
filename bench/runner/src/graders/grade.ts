@@ -21,7 +21,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:net";
 import { dirname, join, relative } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import type { CheckResult, FailureClass } from "@podman-desktop/agent-skills-bench-contracts";
+import type { CheckResult, FailureClass } from "@podman-desktop/agent-skills-bench-server-client";
 import { run, tail } from "../exec.ts";
 import type { TaskSpec } from "../tasks.ts";
 import { CHECKS } from "./checks.ts";

@@ -30,7 +30,7 @@ import {
   type Shard,
   type ShardBilling,
   type UploadTrialsRequest,
-} from "@podman-desktop/agent-skills-bench-contracts";
+} from "../contracts/index.ts";
 import { and, desc, eq, gt, lt, sql } from "drizzle-orm";
 import type { Principal } from "../auth/oidc-verifier.ts";
 import { Clock } from "../common/clock.ts";

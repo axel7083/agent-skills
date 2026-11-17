@@ -24,7 +24,7 @@ import tseslint from "typescript-eslint";
 
 export default defineConfig(
   // Generated files, and bench/tasks: the apps agents work on, fixtures rather than our code.
-  globalIgnores(["**/dist/**", "**/dist-scripts/**", "bench/server-client/src/**", "**/coverage/**", "**/schemas/**", "**/drizzle/**", "bench/tasks/**"]),
+  globalIgnores(["**/dist/**", "**/dist-scripts/**", "**/dist-mockup/**", "bench/server-client/src/**", "**/coverage/**", "**/drizzle/**", "bench/tasks/**"]),
   // Podman Desktop's shared rules (empty for now); this repository's own rules follow until they move there.
   podmanDesktop,
   eslint.configs.recommended,

@@ -311,17 +311,11 @@ importers:
         specifier: 'catalog:'
         version: 5.0.4(@types/node@24.19.2)(msw@3.0.5(@types/node@24.19.2)(typescript@6.0.3)(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
-  bench/contracts:
-    dependencies:
-      zod:
-        specifier: 'catalog:'
-        version: 4.6.6
-
   bench/report:
     dependencies:
-      '@podman-desktop/agent-skills-bench-contracts':
+      '@podman-desktop/agent-skills-bench-server-client':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../server-client
       vega:
         specifier: 'catalog:'
         version: 6.4.0
@@ -344,9 +338,6 @@ importers:
 
   bench/runner:
     dependencies:
-      '@podman-desktop/agent-skills-bench-contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@podman-desktop/agent-skills-bench-server-client':
         specifier: workspace:*
         version: link:../server-client
@@ -380,9 +371,6 @@ importers:
       '@nestjs/throttler':
         specifier: 'catalog:'
         version: 6.7.1(@nestjs/common@12.5.0(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.5.0(@nestjs/common@12.5.0(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)
-      '@podman-desktop/agent-skills-bench-contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@podman-desktop/agent-skills-bench-report':
         specifier: workspace:*
         version: link:../report
@@ -435,6 +423,12 @@ importers:
       msw:
         specifier: 'catalog:'
         version: 3.0.5(@types/node@24.19.2)(typescript@6.0.3)(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      vega:
+        specifier: 'catalog:'
+        version: 6.4.0
+      vega-lite:
+        specifier: 'catalog:'
+        version: 6.5.0(vega@6.4.0)
 
   bench/server-client:
     dependencies:

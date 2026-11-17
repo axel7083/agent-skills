@@ -13,7 +13,6 @@
     "cli": "node --conditions=@podman-desktop/agent-skills-source src/cli.ts"
   },
   "dependencies": {
-    "@podman-desktop/agent-skills-bench-contracts": "workspace:*",
     "@podman-desktop/agent-skills-bench-server-client": "workspace:*",
     "yaml": "catalog:",
     "zod": "catalog:"

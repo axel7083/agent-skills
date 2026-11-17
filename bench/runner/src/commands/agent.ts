@@ -19,7 +19,7 @@
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Shard } from "@podman-desktop/agent-skills-bench-contracts";
+import { zShard } from "@podman-desktop/agent-skills-bench-server-client/zod";
 import { run, tail } from "../exec.ts";
 import { mask } from "../github.ts";
 import { agentArgs, harborEnvironment, skillArgs, writeHarborTask } from "../harbor.ts";
@@ -47,7 +47,7 @@ const MAX_SCANNED_BYTES = 5_000_000;
  * Harbor exits. Writes `<out>/<trial>/{result.json, trajectory.json, app/}` for the grade job.
  */
 export async function agent(options: AgentOptions): Promise<void> {
-  const shard = Shard.parse(JSON.parse(options.shard));
+  const shard = zShard.parse(JSON.parse(options.shard));
   const task = loadTask(shard.task);
   const allSkills = readdirSync(SKILLS_DIR, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
   loadEval(options.skill);

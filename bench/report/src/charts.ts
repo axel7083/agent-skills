@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { ModelResult, PublishedTrial, Results } from "@podman-desktop/agent-skills-bench-contracts";
+import type { ModelResult, PublishedTrial, Results } from "@podman-desktop/agent-skills-bench-server-client";
 import type { TopLevelSpec } from "vega-lite";
 import { compact, interval, percent, points, signedNumber, signedPercent, signedUsd, usd } from "./format.ts";
 import { type Theme, vegaConfig } from "./theme.ts";

@@ -22,7 +22,7 @@ name: bench-server
 on:
   push:
     branches: [main]
-    paths: [bench/server/**, bench/contracts/**, bench/report/**, pnpm-lock.yaml]
+    paths: [bench/server/**, bench/server-client/**, bench/report/**, pnpm-lock.yaml]
   workflow_dispatch:
 
 permissions: {}

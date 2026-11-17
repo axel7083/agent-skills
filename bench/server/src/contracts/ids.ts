@@ -44,8 +44,8 @@ export const SemVer = z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
  * `without`: no skill installed. `with`: only the evaluated skill. `bundle`: every skill of the
  * repository, to catch interference between skills.
  */
-export const Arm = z.enum(["without", "with", "bundle"]);
+export const Arm = z.enum(["without", "with", "bundle"]).meta({ id: "Arm" });
 export type Arm = z.infer<typeof Arm>;
 
-export const Harness = z.enum(["claude-code", "codex", "opencode"]);
+export const Harness = z.enum(["claude-code", "codex", "opencode"]).meta({ id: "Harness" });
 export type Harness = z.infer<typeof Harness>;

@@ -18,7 +18,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import type { CheckStatus } from "@podman-desktop/agent-skills-bench-contracts";
+import type { CheckStatus } from "@podman-desktop/agent-skills-bench-server-client";
 import { type Containerfile, externalImages, find, finalStage, flags, isExecForm } from "./containerfile.ts";
 import type { Check, GradeContext } from "./model.ts";
 

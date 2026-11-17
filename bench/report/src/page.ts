@@ -20,7 +20,8 @@
  * Browser entry of the report. Every string from the data goes into the DOM through `textContent`:
  * check evidence and model names are agent- or input-controlled.
  */
-import { PublishedTrial, Results } from "@podman-desktop/agent-skills-bench-contracts";
+import { type PublishedTrial, type Results } from "@podman-desktop/agent-skills-bench-server-client";
+import { zPublishedTrial, zResults } from "@podman-desktop/agent-skills-bench-server-client/zod";
 import embed from "vega-embed";
 import { expressionInterpreter } from "vega-interpreter";
 import { z } from "zod";
@@ -184,8 +185,8 @@ function filters(results: Results, state: State, onChange: () => void): HTMLElem
 async function main(): Promise<void> {
   const root = document.getElementById("report");
   if (root === null) return;
-  const results = readIsland(RESULTS_ELEMENT_ID, Results);
-  const trials = readIsland(TRIALS_ELEMENT_ID, z.array(PublishedTrial));
+  const results = readIsland(RESULTS_ELEMENT_ID, zResults);
+  const trials = readIsland(TRIALS_ELEMENT_ID, z.array(zPublishedTrial));
   const state: State = { model: ALL_MODELS, theme: currentTheme() };
   const chartsContainer = element("div", "charts");
   const rerender = (): void => {

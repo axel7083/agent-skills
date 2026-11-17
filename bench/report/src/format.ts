@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { Interval } from "@podman-desktop/agent-skills-bench-contracts";
+import type { Interval } from "@podman-desktop/agent-skills-bench-server-client";
 
 export function percent(rate: number | null, digits = 0): string {
   return rate === null ? "–" : `${(rate * 100).toFixed(digits)}%`;

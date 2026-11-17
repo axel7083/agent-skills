@@ -18,10 +18,17 @@
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { EvalSpec, Slug } from "@podman-desktop/agent-skills-bench-contracts";
+import { type EvalSpec } from "@podman-desktop/agent-skills-bench-server-client";
+import { zEvalSpec } from "@podman-desktop/agent-skills-bench-server-client/zod";
 import { parse } from "yaml";
 import { z } from "zod";
 import { EVALS_DIR, TASKS_DIR } from "./paths.ts";
+
+/** Task, skill and shard ids: lowercase letters, digits and single hyphens (the API's pattern). */
+export const Slug = z
+  .string()
+  .max(64)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
 
 /** `bench/tasks/<id>/task.yaml`: how a task's result is run and probed. */
 export const TaskSpec = z.strictObject({
@@ -64,7 +71,7 @@ export function taskIds(): string[] {
 }
 
 export function loadEval(skill: string): EvalSpec {
-  return EvalSpec.parse(parse(readFileSync(join(EVALS_DIR, `${Slug.parse(skill)}.yaml`), "utf8")));
+  return zEvalSpec.parse(parse(readFileSync(join(EVALS_DIR, `${Slug.parse(skill)}.yaml`), "utf8")));
 }
 
 export const OracleExpectation = z.strictObject({

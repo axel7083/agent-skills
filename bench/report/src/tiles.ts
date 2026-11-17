@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { Results } from "@podman-desktop/agent-skills-bench-contracts";
+import type { Results } from "@podman-desktop/agent-skills-bench-server-client";
 import { percent, points, signedPercent, usd } from "./format.ts";
 
 /** A headline number: label, value, and the line that qualifies it. Status always carries an icon. */

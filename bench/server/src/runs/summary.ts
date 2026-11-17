@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { ModelResult, Results } from "@podman-desktop/agent-skills-bench-contracts";
+import type { ModelResult, Results } from "../contracts/index.ts";
 import { interval, percent, points, signedPercent, signedUsd, usd } from "@podman-desktop/agent-skills-bench-report";
 
 const VERDICTS: Record<NonNullable<ModelResult["verdict"]>, string> = {

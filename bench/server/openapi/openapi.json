@@ -10,136 +10,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "spec": {
-                    "type": "object",
-                    "properties": {
-                      "skill": {
-                        "type": "string",
-                        "maxLength": 64,
-                        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                      },
-                      "tasks": {
-                        "minItems": 1,
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "maxLength": 64,
-                          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                        }
-                      },
-                      "targets": {
-                        "minItems": 1,
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "maxLength": 64,
-                          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                        }
-                      },
-                      "controls": {
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "maxLength": 64,
-                          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                        }
-                      }
-                    },
-                    "required": [
-                      "skill",
-                      "tasks",
-                      "targets",
-                      "controls"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "skillSha": {
-                    "type": "string",
-                    "pattern": "^[0-9a-f]{40}$"
-                  },
-                  "skillVersion": {
-                    "type": "string",
-                    "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
-                  },
-                  "checkTitles": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "string",
-                      "maxLength": 80
-                    }
-                  },
-                  "cells": {
-                    "minItems": 1,
-                    "maxItems": 8,
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "harness": {
-                          "type": "string",
-                          "enum": [
-                            "claude-code",
-                            "codex",
-                            "opencode"
-                          ]
-                        },
-                        "model": {
-                          "type": "string",
-                          "maxLength": 128,
-                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
-                        }
-                      },
-                      "required": [
-                        "harness",
-                        "model"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "arms": {
-                    "minItems": 2,
-                    "maxItems": 3,
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "enum": [
-                        "without",
-                        "with",
-                        "bundle"
-                      ]
-                    }
-                  },
-                  "trials": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 10
-                  },
-                  "maxUsd": {
-                    "type": "number",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "maximum": 1000
-                  },
-                  "agentTimeoutMinutes": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 60
-                  }
-                },
-                "required": [
-                  "spec",
-                  "skillSha",
-                  "skillVersion",
-                  "checkTitles",
-                  "cells",
-                  "arms",
-                  "trials",
-                  "maxUsd",
-                  "agentTimeoutMinutes"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/CreateRunRequest"
               }
             }
           }
@@ -150,66 +21,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "runId": {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                    },
-                    "shards": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "maxLength": 64,
-                            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                          },
-                          "harness": {
-                            "type": "string",
-                            "enum": [
-                              "claude-code",
-                              "codex",
-                              "opencode"
-                            ]
-                          },
-                          "model": {
-                            "type": "string",
-                            "maxLength": 128,
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
-                          },
-                          "arm": {
-                            "type": "string",
-                            "enum": [
-                              "without",
-                              "with",
-                              "bundle"
-                            ]
-                          },
-                          "task": {
-                            "type": "string",
-                            "maxLength": 64,
-                            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "harness",
-                          "model",
-                          "arm",
-                          "task"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": [
-                    "runId",
-                    "shards"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/CreateRunResponse"
                 }
               }
             }
@@ -219,16 +31,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -238,16 +41,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -257,16 +51,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -276,16 +61,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -295,16 +71,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -351,45 +118,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "key": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "anthropicBaseUrl": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "openaiBaseUrl": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "provider": {
-                      "type": "string",
-                      "maxLength": 64,
-                      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                    },
-                    "expiresAt": {
-                      "type": "string",
-                      "format": "date-time",
-                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                    },
-                    "limitUsd": {
-                      "type": "number",
-                      "minimum": 0,
-                      "exclusiveMinimum": true
-                    }
-                  },
-                  "required": [
-                    "key",
-                    "anthropicBaseUrl",
-                    "openaiBaseUrl",
-                    "provider",
-                    "expiresAt",
-                    "limitUsd"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/MintedKey"
                 }
               }
             }
@@ -399,16 +128,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -418,16 +138,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -437,16 +148,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -456,16 +158,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -513,16 +206,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -532,16 +216,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -551,16 +226,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -597,210 +263,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "shard": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                  },
-                  "attempt": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 9007199254740991
-                  },
-                  "artifactId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "maximum": 9007199254740991
-                  },
-                  "trials": {
-                    "maxItems": 10,
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "schemaVersion": {
-                          "type": "number",
-                          "enum": [
-                            1
-                          ]
-                        },
-                        "skill": {
-                          "type": "string",
-                          "maxLength": 64,
-                          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                        },
-                        "arm": {
-                          "type": "string",
-                          "enum": [
-                            "without",
-                            "with",
-                            "bundle"
-                          ]
-                        },
-                        "harness": {
-                          "type": "string",
-                          "enum": [
-                            "claude-code",
-                            "codex",
-                            "opencode"
-                          ]
-                        },
-                        "model": {
-                          "type": "string",
-                          "maxLength": 128,
-                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
-                        },
-                        "task": {
-                          "type": "string",
-                          "maxLength": 64,
-                          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                        },
-                        "attempt": {
-                          "type": "integer",
-                          "minimum": 1,
-                          "maximum": 9007199254740991
-                        },
-                        "trial": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 9007199254740991
-                        },
-                        "works": {
-                          "type": "boolean"
-                        },
-                        "failureClass": {
-                          "type": "string",
-                          "enum": [
-                            "none",
-                            "no-artifact",
-                            "build",
-                            "start",
-                            "probe",
-                            "timeout",
-                            "infra"
-                          ]
-                        },
-                        "checks": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "type": "object",
-                            "properties": {
-                              "status": {
-                                "type": "string",
-                                "enum": [
-                                  "pass",
-                                  "fail",
-                                  "na",
-                                  "error"
-                                ]
-                              },
-                              "evidence": {
-                                "type": "string",
-                                "maxLength": 1024
-                              }
-                            },
-                            "required": [
-                              "status",
-                              "evidence"
-                            ],
-                            "additionalProperties": false
-                          }
-                        },
-                        "agentSeconds": {
-                          "type": "number",
-                          "minimum": 0
-                        },
-                        "agentReported": {
-                          "type": "object",
-                          "properties": {
-                            "triggered": {
-                              "type": "boolean"
-                            },
-                            "tokens": {
-                              "type": "object",
-                              "properties": {
-                                "input": {
-                                  "type": "integer",
-                                  "minimum": 0,
-                                  "maximum": 9007199254740991
-                                },
-                                "cached": {
-                                  "type": "integer",
-                                  "minimum": 0,
-                                  "maximum": 9007199254740991
-                                },
-                                "output": {
-                                  "type": "integer",
-                                  "minimum": 0,
-                                  "maximum": 9007199254740991
-                                }
-                              },
-                              "required": [
-                                "input",
-                                "cached",
-                                "output"
-                              ],
-                              "additionalProperties": false
-                            },
-                            "turns": {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 9007199254740991
-                            },
-                            "toolCalls": {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 9007199254740991
-                            }
-                          },
-                          "required": [
-                            "triggered",
-                            "tokens",
-                            "turns",
-                            "toolCalls"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "graderCommit": {
-                          "type": "string",
-                          "pattern": "^[0-9a-f]{40}$"
-                        },
-                        "transcriptPath": {
-                          "type": "string",
-                          "pattern": "^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,255}$"
-                        }
-                      },
-                      "required": [
-                        "schemaVersion",
-                        "skill",
-                        "arm",
-                        "harness",
-                        "model",
-                        "task",
-                        "attempt",
-                        "trial",
-                        "works",
-                        "failureClass",
-                        "checks",
-                        "agentSeconds",
-                        "agentReported",
-                        "graderCommit",
-                        "transcriptPath"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                },
-                "required": [
-                  "shard",
-                  "attempt",
-                  "artifactId",
-                  "trials"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/UploadTrialsRequest"
               }
             }
           }
@@ -814,16 +277,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -833,16 +287,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -852,16 +297,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -899,21 +335,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "reportUrl": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "summaryMarkdown": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "reportUrl",
-                    "summaryMarkdown"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/CompleteRunResponse"
                 }
               }
             }
@@ -923,16 +345,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -942,16 +355,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -978,164 +382,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "schemaVersion": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "runs": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "runId": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "githubRunId": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "maximum": 9007199254740991
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "running",
-                              "completed",
-                              "abandoned"
-                            ]
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "completedAt": {
-                            "nullable": true,
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "skill": {
-                            "type": "string",
-                            "maxLength": 64,
-                            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                          },
-                          "skillSha": {
-                            "type": "string",
-                            "pattern": "^[0-9a-f]{40}$"
-                          },
-                          "skillVersion": {
-                            "type": "string",
-                            "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
-                          },
-                          "cells": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "harness": {
-                                  "type": "string",
-                                  "enum": [
-                                    "claude-code",
-                                    "codex",
-                                    "opencode"
-                                  ]
-                                },
-                                "model": {
-                                  "type": "string",
-                                  "maxLength": 128,
-                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
-                                }
-                              },
-                              "required": [
-                                "harness",
-                                "model"
-                              ],
-                              "additionalProperties": false
-                            }
-                          },
-                          "arms": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "enum": [
-                                "without",
-                                "with",
-                                "bundle"
-                              ]
-                            }
-                          },
-                          "trials": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "costUsd": {
-                            "nullable": true,
-                            "type": "number"
-                          },
-                          "maxUsd": {
-                            "type": "number"
-                          },
-                          "verdicts": {
-                            "nullable": true,
-                            "type": "object",
-                            "properties": {
-                              "helps": {
-                                "type": "integer",
-                                "minimum": -9007199254740991,
-                                "maximum": 9007199254740991
-                              },
-                              "noEffect": {
-                                "type": "integer",
-                                "minimum": -9007199254740991,
-                                "maximum": 9007199254740991
-                              },
-                              "hurts": {
-                                "type": "integer",
-                                "minimum": -9007199254740991,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "helps",
-                              "noEffect",
-                              "hurts"
-                            ],
-                            "additionalProperties": false
-                          }
-                        },
-                        "required": [
-                          "runId",
-                          "githubRunId",
-                          "status",
-                          "createdAt",
-                          "completedAt",
-                          "skill",
-                          "skillSha",
-                          "skillVersion",
-                          "cells",
-                          "arms",
-                          "trials",
-                          "costUsd",
-                          "maxUsd",
-                          "verdicts"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": [
-                    "schemaVersion",
-                    "runs"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/RunList"
                 }
               }
             }
@@ -1145,16 +392,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1187,249 +425,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "runId": {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                    },
-                    "githubRunId": {
-                      "type": "integer",
-                      "minimum": 0,
-                      "exclusiveMinimum": true,
-                      "maximum": 9007199254740991
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "running",
-                        "completed",
-                        "abandoned"
-                      ]
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time",
-                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                    },
-                    "completedAt": {
-                      "nullable": true,
-                      "type": "string",
-                      "format": "date-time",
-                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                    },
-                    "skill": {
-                      "type": "string",
-                      "maxLength": 64,
-                      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                    },
-                    "skillSha": {
-                      "type": "string",
-                      "pattern": "^[0-9a-f]{40}$"
-                    },
-                    "skillVersion": {
-                      "type": "string",
-                      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
-                    },
-                    "cells": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "harness": {
-                            "type": "string",
-                            "enum": [
-                              "claude-code",
-                              "codex",
-                              "opencode"
-                            ]
-                          },
-                          "model": {
-                            "type": "string",
-                            "maxLength": 128,
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
-                          }
-                        },
-                        "required": [
-                          "harness",
-                          "model"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "arms": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "enum": [
-                          "without",
-                          "with",
-                          "bundle"
-                        ]
-                      }
-                    },
-                    "trials": {
-                      "type": "integer",
-                      "minimum": -9007199254740991,
-                      "maximum": 9007199254740991
-                    },
-                    "costUsd": {
-                      "nullable": true,
-                      "type": "number"
-                    },
-                    "maxUsd": {
-                      "type": "number"
-                    },
-                    "verdicts": {
-                      "nullable": true,
-                      "type": "object",
-                      "properties": {
-                        "helps": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        },
-                        "noEffect": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        },
-                        "hurts": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        }
-                      },
-                      "required": [
-                        "helps",
-                        "noEffect",
-                        "hurts"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "tasks": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "maxLength": 64,
-                        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                      }
-                    },
-                    "shards": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "maxLength": 64,
-                            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                          },
-                          "harness": {
-                            "type": "string",
-                            "enum": [
-                              "claude-code",
-                              "codex",
-                              "opencode"
-                            ]
-                          },
-                          "model": {
-                            "type": "string",
-                            "maxLength": 128,
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
-                          },
-                          "arm": {
-                            "type": "string",
-                            "enum": [
-                              "without",
-                              "with",
-                              "bundle"
-                            ]
-                          },
-                          "task": {
-                            "type": "string",
-                            "maxLength": 64,
-                            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "harness",
-                          "model",
-                          "arm",
-                          "task"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "billing": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "shard": {
-                            "type": "string",
-                            "maxLength": 64,
-                            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                          },
-                          "attempt": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          },
-                          "costUsd": {
-                            "nullable": true,
-                            "type": "number"
-                          },
-                          "gatewayTokens": {
-                            "nullable": true,
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "agentTokens": {
-                            "nullable": true,
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "tokenMismatch": {
-                            "type": "boolean"
-                          }
-                        },
-                        "required": [
-                          "shard",
-                          "attempt",
-                          "costUsd",
-                          "gatewayTokens",
-                          "agentTokens",
-                          "tokenMismatch"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": [
-                    "runId",
-                    "githubRunId",
-                    "status",
-                    "createdAt",
-                    "completedAt",
-                    "skill",
-                    "skillSha",
-                    "skillVersion",
-                    "cells",
-                    "arms",
-                    "trials",
-                    "costUsd",
-                    "maxUsd",
-                    "verdicts",
-                    "tasks",
-                    "shards",
-                    "billing"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/RunDetail"
                 }
               }
             }
@@ -1439,16 +435,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1458,16 +445,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1497,23 +475,21 @@
         ],
         "responses": {
           "200": {
-            "description": "NDJSON, one PublishedTrial per line"
+            "description": "NDJSON: one PublishedTrial per line",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedTrial"
+                }
+              }
+            }
           },
           "404": {
             "description": "",
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1523,16 +499,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1565,629 +532,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "schemaVersion": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "skill": {
-                      "type": "string",
-                      "maxLength": 64,
-                      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                    },
-                    "skillSha": {
-                      "type": "string",
-                      "pattern": "^[0-9a-f]{40}$"
-                    },
-                    "skillVersion": {
-                      "type": "string",
-                      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
-                    },
-                    "tasks": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "maxLength": 64,
-                        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                      }
-                    },
-                    "targets": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "maxLength": 64,
-                        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                      }
-                    },
-                    "controls": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "maxLength": 64,
-                        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                      }
-                    },
-                    "checkTitles": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string",
-                        "maxLength": 80
-                      }
-                    },
-                    "bootstrap": {
-                      "type": "object",
-                      "properties": {
-                        "resamples": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "maximum": 9007199254740991
-                        },
-                        "seed": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        },
-                        "confidence": {
-                          "type": "number",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "maximum": 1,
-                          "exclusiveMaximum": true
-                        }
-                      },
-                      "required": [
-                        "resamples",
-                        "seed",
-                        "confidence"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "models": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "harness": {
-                            "type": "string",
-                            "enum": [
-                              "claude-code",
-                              "codex",
-                              "opencode"
-                            ]
-                          },
-                          "model": {
-                            "type": "string",
-                            "maxLength": 128,
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
-                          },
-                          "without": {
-                            "type": "object",
-                            "properties": {
-                              "trials": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 9007199254740991
-                              },
-                              "works": {
-                                "nullable": true,
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                              },
-                              "target": {
-                                "nullable": true,
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                              },
-                              "control": {
-                                "nullable": true,
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                              },
-                              "successes": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 9007199254740991
-                              },
-                              "tokens": {
-                                "type": "object",
-                                "properties": {
-                                  "median": {
-                                    "type": "number"
-                                  },
-                                  "p90": {
-                                    "type": "number"
-                                  }
-                                },
-                                "required": [
-                                  "median",
-                                  "p90"
-                                ],
-                                "additionalProperties": false
-                              },
-                              "turns": {
-                                "type": "number"
-                              },
-                              "seconds": {
-                                "type": "number"
-                              },
-                              "costUsd": {
-                                "type": "number"
-                              },
-                              "costPerSuccessUsd": {
-                                "nullable": true,
-                                "type": "number"
-                              },
-                              "triggered": {
-                                "nullable": true,
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                              }
-                            },
-                            "required": [
-                              "trials",
-                              "works",
-                              "target",
-                              "control",
-                              "successes",
-                              "tokens",
-                              "turns",
-                              "seconds",
-                              "costUsd",
-                              "costPerSuccessUsd",
-                              "triggered"
-                            ],
-                            "additionalProperties": false
-                          },
-                          "with": {
-                            "type": "object",
-                            "properties": {
-                              "trials": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 9007199254740991
-                              },
-                              "works": {
-                                "nullable": true,
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                              },
-                              "target": {
-                                "nullable": true,
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                              },
-                              "control": {
-                                "nullable": true,
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                              },
-                              "successes": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 9007199254740991
-                              },
-                              "tokens": {
-                                "type": "object",
-                                "properties": {
-                                  "median": {
-                                    "type": "number"
-                                  },
-                                  "p90": {
-                                    "type": "number"
-                                  }
-                                },
-                                "required": [
-                                  "median",
-                                  "p90"
-                                ],
-                                "additionalProperties": false
-                              },
-                              "turns": {
-                                "type": "number"
-                              },
-                              "seconds": {
-                                "type": "number"
-                              },
-                              "costUsd": {
-                                "type": "number"
-                              },
-                              "costPerSuccessUsd": {
-                                "nullable": true,
-                                "type": "number"
-                              },
-                              "triggered": {
-                                "nullable": true,
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                              }
-                            },
-                            "required": [
-                              "trials",
-                              "works",
-                              "target",
-                              "control",
-                              "successes",
-                              "tokens",
-                              "turns",
-                              "seconds",
-                              "costUsd",
-                              "costPerSuccessUsd",
-                              "triggered"
-                            ],
-                            "additionalProperties": false
-                          },
-                          "delta": {
-                            "type": "object",
-                            "properties": {
-                              "target": {
-                                "nullable": true,
-                                "type": "object",
-                                "properties": {
-                                  "estimate": {
-                                    "type": "number"
-                                  },
-                                  "low": {
-                                    "type": "number"
-                                  },
-                                  "high": {
-                                    "type": "number"
-                                  }
-                                },
-                                "required": [
-                                  "estimate",
-                                  "low",
-                                  "high"
-                                ],
-                                "additionalProperties": false
-                              },
-                              "control": {
-                                "nullable": true,
-                                "type": "object",
-                                "properties": {
-                                  "estimate": {
-                                    "type": "number"
-                                  },
-                                  "low": {
-                                    "type": "number"
-                                  },
-                                  "high": {
-                                    "type": "number"
-                                  }
-                                },
-                                "required": [
-                                  "estimate",
-                                  "low",
-                                  "high"
-                                ],
-                                "additionalProperties": false
-                              },
-                              "works": {
-                                "nullable": true,
-                                "type": "object",
-                                "properties": {
-                                  "estimate": {
-                                    "type": "number"
-                                  },
-                                  "low": {
-                                    "type": "number"
-                                  },
-                                  "high": {
-                                    "type": "number"
-                                  }
-                                },
-                                "required": [
-                                  "estimate",
-                                  "low",
-                                  "high"
-                                ],
-                                "additionalProperties": false
-                              },
-                              "normalizedGain": {
-                                "nullable": true,
-                                "type": "number"
-                              },
-                              "tokensPct": {
-                                "nullable": true,
-                                "type": "number"
-                              },
-                              "costUsd": {
-                                "type": "number"
-                              },
-                              "turns": {
-                                "type": "number"
-                              },
-                              "seconds": {
-                                "type": "number"
-                              }
-                            },
-                            "required": [
-                              "target",
-                              "control",
-                              "works",
-                              "normalizedGain",
-                              "tokensPct",
-                              "costUsd",
-                              "turns",
-                              "seconds"
-                            ],
-                            "additionalProperties": false
-                          },
-                          "verdict": {
-                            "nullable": true,
-                            "type": "string",
-                            "enum": [
-                              "helps",
-                              "no-effect",
-                              "hurts"
-                            ]
-                          },
-                          "regression": {
-                            "type": "boolean"
-                          },
-                          "trigger": {
-                            "type": "object",
-                            "properties": {
-                              "loadedSuccess": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 9007199254740991
-                              },
-                              "loadedFailure": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 9007199254740991
-                              },
-                              "notLoaded": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "loadedSuccess",
-                              "loadedFailure",
-                              "notLoaded"
-                            ],
-                            "additionalProperties": false
-                          },
-                          "checks": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "check": {
-                                  "type": "string",
-                                  "maxLength": 64,
-                                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                                },
-                                "role": {
-                                  "type": "string",
-                                  "enum": [
-                                    "target",
-                                    "control"
-                                  ]
-                                },
-                                "without": {
-                                  "type": "object",
-                                  "properties": {
-                                    "rate": {
-                                      "nullable": true,
-                                      "type": "number",
-                                      "minimum": 0,
-                                      "maximum": 1
-                                    },
-                                    "n": {
-                                      "type": "integer",
-                                      "minimum": 0,
-                                      "maximum": 9007199254740991
-                                    }
-                                  },
-                                  "required": [
-                                    "rate",
-                                    "n"
-                                  ],
-                                  "additionalProperties": false
-                                },
-                                "with": {
-                                  "type": "object",
-                                  "properties": {
-                                    "rate": {
-                                      "nullable": true,
-                                      "type": "number",
-                                      "minimum": 0,
-                                      "maximum": 1
-                                    },
-                                    "n": {
-                                      "type": "integer",
-                                      "minimum": 0,
-                                      "maximum": 9007199254740991
-                                    }
-                                  },
-                                  "required": [
-                                    "rate",
-                                    "n"
-                                  ],
-                                  "additionalProperties": false
-                                }
-                              },
-                              "required": [
-                                "check",
-                                "role",
-                                "without",
-                                "with"
-                              ],
-                              "additionalProperties": false
-                            }
-                          },
-                          "tasks": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "task": {
-                                  "type": "string",
-                                  "maxLength": 64,
-                                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                                },
-                                "target": {
-                                  "type": "object",
-                                  "properties": {
-                                    "without": {
-                                      "nullable": true,
-                                      "type": "number",
-                                      "minimum": 0,
-                                      "maximum": 1
-                                    },
-                                    "with": {
-                                      "nullable": true,
-                                      "type": "number",
-                                      "minimum": 0,
-                                      "maximum": 1
-                                    }
-                                  },
-                                  "required": [
-                                    "without",
-                                    "with"
-                                  ],
-                                  "additionalProperties": false
-                                },
-                                "checks": {
-                                  "type": "object",
-                                  "additionalProperties": {
-                                    "nullable": true,
-                                    "type": "number"
-                                  }
-                                }
-                              },
-                              "required": [
-                                "task",
-                                "target",
-                                "checks"
-                              ],
-                              "additionalProperties": false
-                            }
-                          }
-                        },
-                        "required": [
-                          "harness",
-                          "model",
-                          "without",
-                          "with",
-                          "delta",
-                          "verdict",
-                          "regression",
-                          "trigger",
-                          "checks",
-                          "tasks"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "overall": {
-                      "type": "object",
-                      "properties": {
-                        "verdicts": {
-                          "type": "object",
-                          "properties": {
-                            "helps": {
-                              "type": "integer",
-                              "minimum": -9007199254740991,
-                              "maximum": 9007199254740991
-                            },
-                            "noEffect": {
-                              "type": "integer",
-                              "minimum": -9007199254740991,
-                              "maximum": 9007199254740991
-                            },
-                            "hurts": {
-                              "type": "integer",
-                              "minimum": -9007199254740991,
-                              "maximum": 9007199254740991
-                            }
-                          },
-                          "required": [
-                            "helps",
-                            "noEffect",
-                            "hurts"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "target": {
-                          "nullable": true,
-                          "type": "object",
-                          "properties": {
-                            "estimate": {
-                              "type": "number"
-                            },
-                            "low": {
-                              "type": "number"
-                            },
-                            "high": {
-                              "type": "number"
-                            }
-                          },
-                          "required": [
-                            "estimate",
-                            "low",
-                            "high"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "tokensPct": {
-                          "nullable": true,
-                          "type": "number"
-                        },
-                        "triggered": {
-                          "nullable": true,
-                          "type": "number",
-                          "minimum": 0,
-                          "maximum": 1
-                        },
-                        "costUsd": {
-                          "type": "number"
-                        },
-                        "maxUsd": {
-                          "nullable": true,
-                          "type": "number"
-                        }
-                      },
-                      "required": [
-                        "verdicts",
-                        "target",
-                        "tokensPct",
-                        "triggered",
-                        "costUsd",
-                        "maxUsd"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "schemaVersion",
-                    "skill",
-                    "skillSha",
-                    "skillVersion",
-                    "tasks",
-                    "targets",
-                    "controls",
-                    "checkTitles",
-                    "bootstrap",
-                    "models",
-                    "overall"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/Results"
                 }
               }
             }
@@ -2197,16 +542,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -2216,16 +552,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -2267,16 +594,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -2286,16 +604,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -2354,6 +663,1442 @@
         "description": "GitHub Actions OIDC token, audience = the server's PUBLIC_URL"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "ErrorBody": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "CreateRunRequest": {
+        "type": "object",
+        "properties": {
+          "spec": {
+            "$ref": "#/components/schemas/EvalSpec"
+          },
+          "skillSha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "skillVersion": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+          },
+          "checkTitles": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          "cells": {
+            "minItems": 1,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cell"
+            }
+          },
+          "arms": {
+            "minItems": 2,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Arm"
+            }
+          },
+          "trials": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "maxUsd": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 1000
+          },
+          "agentTimeoutMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "spec",
+          "skillSha",
+          "skillVersion",
+          "checkTitles",
+          "cells",
+          "arms",
+          "trials",
+          "maxUsd",
+          "agentTimeoutMinutes"
+        ],
+        "additionalProperties": false
+      },
+      "EvalSpec": {
+        "type": "object",
+        "properties": {
+          "skill": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "tasks": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          },
+          "targets": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          },
+          "controls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          }
+        },
+        "required": [
+          "skill",
+          "tasks",
+          "targets",
+          "controls"
+        ],
+        "additionalProperties": false
+      },
+      "Cell": {
+        "type": "object",
+        "properties": {
+          "harness": {
+            "$ref": "#/components/schemas/Harness"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+          }
+        },
+        "required": [
+          "harness",
+          "model"
+        ],
+        "additionalProperties": false
+      },
+      "Harness": {
+        "type": "string",
+        "enum": [
+          "claude-code",
+          "codex",
+          "opencode"
+        ]
+      },
+      "Arm": {
+        "type": "string",
+        "enum": [
+          "without",
+          "with",
+          "bundle"
+        ]
+      },
+      "CreateRunResponse": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "shards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Shard"
+            }
+          }
+        },
+        "required": [
+          "runId",
+          "shards"
+        ],
+        "additionalProperties": false
+      },
+      "Shard": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "harness": {
+            "$ref": "#/components/schemas/Harness"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+          },
+          "arm": {
+            "$ref": "#/components/schemas/Arm"
+          },
+          "task": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          }
+        },
+        "required": [
+          "id",
+          "harness",
+          "model",
+          "arm",
+          "task"
+        ],
+        "additionalProperties": false
+      },
+      "MintedKey": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "anthropicBaseUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "openaiBaseUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "provider": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "limitUsd": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true
+          }
+        },
+        "required": [
+          "key",
+          "anthropicBaseUrl",
+          "openaiBaseUrl",
+          "provider",
+          "expiresAt",
+          "limitUsd"
+        ],
+        "additionalProperties": false
+      },
+      "UploadTrialsRequest": {
+        "type": "object",
+        "properties": {
+          "shard": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "artifactId": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 9007199254740991
+          },
+          "trials": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Trial"
+            }
+          }
+        },
+        "required": [
+          "shard",
+          "attempt",
+          "artifactId",
+          "trials"
+        ],
+        "additionalProperties": false
+      },
+      "Trial": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "skill": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "arm": {
+            "$ref": "#/components/schemas/Arm"
+          },
+          "harness": {
+            "$ref": "#/components/schemas/Harness"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+          },
+          "task": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "trial": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "works": {
+            "type": "boolean"
+          },
+          "failureClass": {
+            "$ref": "#/components/schemas/FailureClass"
+          },
+          "checks": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CheckResult"
+            }
+          },
+          "agentSeconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "agentReported": {
+            "$ref": "#/components/schemas/AgentReported"
+          },
+          "graderCommit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "transcriptPath": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,255}$"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "skill",
+          "arm",
+          "harness",
+          "model",
+          "task",
+          "attempt",
+          "trial",
+          "works",
+          "failureClass",
+          "checks",
+          "agentSeconds",
+          "agentReported",
+          "graderCommit",
+          "transcriptPath"
+        ],
+        "additionalProperties": false
+      },
+      "FailureClass": {
+        "type": "string",
+        "enum": [
+          "none",
+          "no-artifact",
+          "build",
+          "start",
+          "probe",
+          "timeout",
+          "infra"
+        ]
+      },
+      "CheckResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/CheckStatus"
+          },
+          "evidence": {
+            "type": "string",
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "status",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "CheckStatus": {
+        "type": "string",
+        "enum": [
+          "pass",
+          "fail",
+          "na",
+          "error"
+        ]
+      },
+      "AgentReported": {
+        "type": "object",
+        "properties": {
+          "triggered": {
+            "type": "boolean"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/Tokens"
+          },
+          "turns": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "toolCalls": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "triggered",
+          "tokens",
+          "turns",
+          "toolCalls"
+        ],
+        "additionalProperties": false
+      },
+      "Tokens": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "cached": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "output": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "input",
+          "cached",
+          "output"
+        ],
+        "additionalProperties": false
+      },
+      "CompleteRunResponse": {
+        "type": "object",
+        "properties": {
+          "reportUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "summaryMarkdown": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reportUrl",
+          "summaryMarkdown"
+        ],
+        "additionalProperties": false
+      },
+      "RunList": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RunSummary"
+            }
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "runs"
+        ],
+        "additionalProperties": false
+      },
+      "RunSummary": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "githubRunId": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 9007199254740991
+          },
+          "status": {
+            "$ref": "#/components/schemas/RunStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "completedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "skill": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "skillSha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "skillVersion": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cell"
+            }
+          },
+          "arms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Arm"
+            }
+          },
+          "trials": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "costUsd": {
+            "nullable": true,
+            "type": "number"
+          },
+          "maxUsd": {
+            "type": "number"
+          },
+          "verdicts": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "helps": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "noEffect": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "hurts": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "helps",
+              "noEffect",
+              "hurts"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "runId",
+          "githubRunId",
+          "status",
+          "createdAt",
+          "completedAt",
+          "skill",
+          "skillSha",
+          "skillVersion",
+          "cells",
+          "arms",
+          "trials",
+          "costUsd",
+          "maxUsd",
+          "verdicts"
+        ],
+        "additionalProperties": false
+      },
+      "RunStatus": {
+        "type": "string",
+        "enum": [
+          "running",
+          "completed",
+          "abandoned"
+        ]
+      },
+      "RunDetail": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "githubRunId": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 9007199254740991
+          },
+          "status": {
+            "$ref": "#/components/schemas/RunStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "completedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "skill": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "skillSha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "skillVersion": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cell"
+            }
+          },
+          "arms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Arm"
+            }
+          },
+          "trials": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "costUsd": {
+            "nullable": true,
+            "type": "number"
+          },
+          "maxUsd": {
+            "type": "number"
+          },
+          "verdicts": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "helps": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "noEffect": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "hurts": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "helps",
+              "noEffect",
+              "hurts"
+            ],
+            "additionalProperties": false
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          },
+          "shards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Shard"
+            }
+          },
+          "billing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShardBilling"
+            }
+          }
+        },
+        "required": [
+          "runId",
+          "githubRunId",
+          "status",
+          "createdAt",
+          "completedAt",
+          "skill",
+          "skillSha",
+          "skillVersion",
+          "cells",
+          "arms",
+          "trials",
+          "costUsd",
+          "maxUsd",
+          "verdicts",
+          "tasks",
+          "shards",
+          "billing"
+        ],
+        "additionalProperties": false
+      },
+      "ShardBilling": {
+        "type": "object",
+        "properties": {
+          "shard": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "costUsd": {
+            "nullable": true,
+            "type": "number"
+          },
+          "gatewayTokens": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "agentTokens": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "tokenMismatch": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "shard",
+          "attempt",
+          "costUsd",
+          "gatewayTokens",
+          "agentTokens",
+          "tokenMismatch"
+        ],
+        "additionalProperties": false
+      },
+      "PublishedTrial": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "skill": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "arm": {
+            "$ref": "#/components/schemas/Arm"
+          },
+          "harness": {
+            "$ref": "#/components/schemas/Harness"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+          },
+          "task": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "trial": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "works": {
+            "type": "boolean"
+          },
+          "failureClass": {
+            "$ref": "#/components/schemas/FailureClass"
+          },
+          "checks": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CheckResult"
+            }
+          },
+          "agentSeconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "agentReported": {
+            "$ref": "#/components/schemas/AgentReported"
+          },
+          "graderCommit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "transcriptPath": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,255}$"
+          },
+          "shard": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "costUsd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "artifactUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "skill",
+          "arm",
+          "harness",
+          "model",
+          "task",
+          "attempt",
+          "trial",
+          "works",
+          "failureClass",
+          "checks",
+          "agentSeconds",
+          "agentReported",
+          "graderCommit",
+          "transcriptPath",
+          "shard",
+          "costUsd",
+          "artifactUrl"
+        ],
+        "additionalProperties": false
+      },
+      "Results": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "skill": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "skillSha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "skillVersion": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          },
+          "controls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          },
+          "checkTitles": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          "bootstrap": {
+            "type": "object",
+            "properties": {
+              "resamples": {
+                "type": "integer",
+                "minimum": 0,
+                "exclusiveMinimum": true,
+                "maximum": 9007199254740991
+              },
+              "seed": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": true,
+                "maximum": 1,
+                "exclusiveMaximum": true
+              }
+            },
+            "required": [
+              "resamples",
+              "seed",
+              "confidence"
+            ],
+            "additionalProperties": false
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelResult"
+            }
+          },
+          "overall": {
+            "type": "object",
+            "properties": {
+              "verdicts": {
+                "type": "object",
+                "properties": {
+                  "helps": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "noEffect": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "hurts": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "helps",
+                  "noEffect",
+                  "hurts"
+                ],
+                "additionalProperties": false
+              },
+              "target": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Interval"
+                  }
+                ]
+              },
+              "tokensPct": {
+                "nullable": true,
+                "type": "number"
+              },
+              "triggered": {
+                "nullable": true,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "costUsd": {
+                "type": "number"
+              },
+              "maxUsd": {
+                "nullable": true,
+                "type": "number"
+              }
+            },
+            "required": [
+              "verdicts",
+              "target",
+              "tokensPct",
+              "triggered",
+              "costUsd",
+              "maxUsd"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "skill",
+          "skillSha",
+          "skillVersion",
+          "tasks",
+          "targets",
+          "controls",
+          "checkTitles",
+          "bootstrap",
+          "models",
+          "overall"
+        ],
+        "additionalProperties": false
+      },
+      "ModelResult": {
+        "type": "object",
+        "properties": {
+          "harness": {
+            "$ref": "#/components/schemas/Harness"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+          },
+          "without": {
+            "$ref": "#/components/schemas/ArmSummary"
+          },
+          "with": {
+            "$ref": "#/components/schemas/ArmSummary"
+          },
+          "delta": {
+            "type": "object",
+            "properties": {
+              "target": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Interval"
+                  }
+                ]
+              },
+              "control": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Interval"
+                  }
+                ]
+              },
+              "works": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Interval"
+                  }
+                ]
+              },
+              "normalizedGain": {
+                "nullable": true,
+                "type": "number"
+              },
+              "tokensPct": {
+                "nullable": true,
+                "type": "number"
+              },
+              "costUsd": {
+                "type": "number"
+              },
+              "turns": {
+                "type": "number"
+              },
+              "seconds": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "target",
+              "control",
+              "works",
+              "normalizedGain",
+              "tokensPct",
+              "costUsd",
+              "turns",
+              "seconds"
+            ],
+            "additionalProperties": false
+          },
+          "verdict": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Verdict"
+              }
+            ]
+          },
+          "regression": {
+            "type": "boolean"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/Trigger"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckRate"
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskDelta"
+            }
+          }
+        },
+        "required": [
+          "harness",
+          "model",
+          "without",
+          "with",
+          "delta",
+          "verdict",
+          "regression",
+          "trigger",
+          "checks",
+          "tasks"
+        ],
+        "additionalProperties": false
+      },
+      "ArmSummary": {
+        "type": "object",
+        "properties": {
+          "trials": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "works": {
+            "nullable": true,
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "target": {
+            "nullable": true,
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "control": {
+            "nullable": true,
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "successes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tokens": {
+            "type": "object",
+            "properties": {
+              "median": {
+                "type": "number"
+              },
+              "p90": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "median",
+              "p90"
+            ],
+            "additionalProperties": false
+          },
+          "turns": {
+            "type": "number"
+          },
+          "seconds": {
+            "type": "number"
+          },
+          "costUsd": {
+            "type": "number"
+          },
+          "costPerSuccessUsd": {
+            "nullable": true,
+            "type": "number"
+          },
+          "triggered": {
+            "nullable": true,
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "trials",
+          "works",
+          "target",
+          "control",
+          "successes",
+          "tokens",
+          "turns",
+          "seconds",
+          "costUsd",
+          "costPerSuccessUsd",
+          "triggered"
+        ],
+        "additionalProperties": false
+      },
+      "Interval": {
+        "type": "object",
+        "properties": {
+          "estimate": {
+            "type": "number"
+          },
+          "low": {
+            "type": "number"
+          },
+          "high": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "estimate",
+          "low",
+          "high"
+        ],
+        "additionalProperties": false
+      },
+      "Verdict": {
+        "type": "string",
+        "enum": [
+          "helps",
+          "no-effect",
+          "hurts"
+        ]
+      },
+      "Trigger": {
+        "type": "object",
+        "properties": {
+          "loadedSuccess": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "loadedFailure": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "notLoaded": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "loadedSuccess",
+          "loadedFailure",
+          "notLoaded"
+        ],
+        "additionalProperties": false
+      },
+      "CheckRate": {
+        "type": "object",
+        "properties": {
+          "check": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "target",
+              "control"
+            ]
+          },
+          "without": {
+            "type": "object",
+            "properties": {
+              "rate": {
+                "nullable": true,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "n": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "rate",
+              "n"
+            ],
+            "additionalProperties": false
+          },
+          "with": {
+            "type": "object",
+            "properties": {
+              "rate": {
+                "nullable": true,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "n": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "rate",
+              "n"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "check",
+          "role",
+          "without",
+          "with"
+        ],
+        "additionalProperties": false
+      },
+      "TaskDelta": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "without": {
+                "nullable": true,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "with": {
+                "nullable": true,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "without",
+              "with"
+            ],
+            "additionalProperties": false
+          },
+          "checks": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true,
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "task",
+          "target",
+          "checks"
+        ],
+        "additionalProperties": false
+      }
+    }
   }
 }

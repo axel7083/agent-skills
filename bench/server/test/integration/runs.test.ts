@@ -17,7 +17,7 @@
  ***********************************************************************/
 
 import type { NestNodeApplication } from "@nestjs/platform-node";
-import { CompleteRunResponse, CreateRunResponse, MintedKey, PublishedTrial, Results, RunDetail } from "@podman-desktop/agent-skills-bench-contracts";
+import { CompleteRunResponse, CreateRunResponse, MintedKey, PublishedTrial, Results, RunDetail } from "../../src/contracts/index.ts";
 import type { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { SweeperService } from "../../src/sweeper/sweeper.service.ts";

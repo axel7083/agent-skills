@@ -2,52 +2,330 @@
 
 import * as z from 'zod';
 
-export const zCreateRunBody = z.object({
-    spec: z.object({
-        skill: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
-        tasks: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)).min(1),
-        targets: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)).min(1),
-        controls: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/))
-    }),
+export const zErrorBody = z.object({
+    error: z.string()
+});
+
+export const zEvalSpec = z.object({
+    skill: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    tasks: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)).min(1),
+    targets: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)).min(1),
+    controls: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/))
+});
+
+export const zHarness = z.enum([
+    'claude-code',
+    'codex',
+    'opencode'
+]);
+
+export const zCell = z.object({
+    harness: zHarness,
+    model: z.string().max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/)
+});
+
+export const zArm = z.enum([
+    'without',
+    'with',
+    'bundle'
+]);
+
+export const zCreateRunRequest = z.object({
+    spec: zEvalSpec,
     skillSha: z.string().regex(/^[0-9a-f]{40}$/),
     skillVersion: z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
     checkTitles: z.record(z.string(), z.string().max(80)),
-    cells: z.array(z.object({
-        harness: z.enum([
-            'claude-code',
-            'codex',
-            'opencode'
-        ]),
-        model: z.string().max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/)
-    })).min(1).max(8),
-    arms: z.array(z.enum([
-        'without',
-        'with',
-        'bundle'
-    ])).min(2).max(3),
+    cells: z.array(zCell).min(1).max(8),
+    arms: z.array(zArm).min(2).max(3),
     trials: z.int().gte(1).lte(10),
     maxUsd: z.number().gt(0).lte(1000),
     agentTimeoutMinutes: z.int().gte(1).lte(60)
 });
 
+export const zShard = z.object({
+    id: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    harness: zHarness,
+    model: z.string().max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/),
+    arm: zArm,
+    task: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)
+});
+
 export const zCreateRunResponse = z.object({
     runId: z.uuid().regex(/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/),
-    shards: z.array(z.object({
-        id: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
-        harness: z.enum([
-            'claude-code',
-            'codex',
-            'opencode'
-        ]),
-        model: z.string().max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/),
-        arm: z.enum([
-            'without',
-            'with',
-            'bundle'
-        ]),
-        task: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)
-    }))
+    shards: z.array(zShard)
 });
+
+export const zMintedKey = z.object({
+    key: z.string().min(1),
+    anthropicBaseUrl: z.url(),
+    openaiBaseUrl: z.url(),
+    provider: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    expiresAt: z.iso.datetime().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$/),
+    limitUsd: z.number().gt(0)
+});
+
+export const zFailureClass = z.enum([
+    'none',
+    'no-artifact',
+    'build',
+    'start',
+    'probe',
+    'timeout',
+    'infra'
+]);
+
+export const zCheckStatus = z.enum([
+    'pass',
+    'fail',
+    'na',
+    'error'
+]);
+
+export const zCheckResult = z.object({
+    status: zCheckStatus,
+    evidence: z.string().max(1024)
+});
+
+export const zTokens = z.object({
+    input: z.int().gte(0).lte(9007199254740991),
+    cached: z.int().gte(0).lte(9007199254740991),
+    output: z.int().gte(0).lte(9007199254740991)
+});
+
+export const zAgentReported = z.object({
+    triggered: z.boolean(),
+    tokens: zTokens,
+    turns: z.int().gte(0).lte(9007199254740991),
+    toolCalls: z.int().gte(0).lte(9007199254740991)
+});
+
+export const zTrial = z.object({
+    schemaVersion: z.literal(1),
+    skill: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    arm: zArm,
+    harness: zHarness,
+    model: z.string().max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/),
+    task: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    attempt: z.int().gte(1).lte(9007199254740991),
+    trial: z.int().gte(0).lte(9007199254740991),
+    works: z.boolean(),
+    failureClass: zFailureClass,
+    checks: z.record(z.string(), zCheckResult),
+    agentSeconds: z.number().gte(0),
+    agentReported: zAgentReported,
+    graderCommit: z.string().regex(/^[0-9a-f]{40}$/),
+    transcriptPath: z.string().regex(/^[A-Za-z0-9._-][A-Za-z0-9._\/-]{0,255}$/)
+});
+
+export const zUploadTrialsRequest = z.object({
+    shard: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    attempt: z.int().gte(1).lte(9007199254740991),
+    artifactId: z.int().gt(0).lte(9007199254740991),
+    trials: z.array(zTrial).max(10)
+});
+
+export const zCompleteRunResponse = z.object({
+    reportUrl: z.url(),
+    summaryMarkdown: z.string()
+});
+
+export const zRunStatus = z.enum([
+    'running',
+    'completed',
+    'abandoned'
+]);
+
+export const zRunSummary = z.object({
+    runId: z.uuid().regex(/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/),
+    githubRunId: z.int().gt(0).lte(9007199254740991),
+    status: zRunStatus,
+    createdAt: z.iso.datetime().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$/),
+    completedAt: z.iso.datetime().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$/).nullable(),
+    skill: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    skillSha: z.string().regex(/^[0-9a-f]{40}$/),
+    skillVersion: z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
+    cells: z.array(zCell),
+    arms: z.array(zArm),
+    trials: z.int().gte(-9007199254740991).lte(9007199254740991),
+    costUsd: z.number().nullable(),
+    maxUsd: z.number(),
+    verdicts: z.object({
+        helps: z.int().gte(-9007199254740991).lte(9007199254740991),
+        noEffect: z.int().gte(-9007199254740991).lte(9007199254740991),
+        hurts: z.int().gte(-9007199254740991).lte(9007199254740991)
+    }).nullable()
+});
+
+export const zRunList = z.object({
+    schemaVersion: z.literal(1),
+    runs: z.array(zRunSummary)
+});
+
+export const zShardBilling = z.object({
+    shard: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    attempt: z.int().gte(1).lte(9007199254740991),
+    costUsd: z.number().nullable(),
+    gatewayTokens: z.int().gte(-9007199254740991).lte(9007199254740991).nullable(),
+    agentTokens: z.int().gte(-9007199254740991).lte(9007199254740991).nullable(),
+    tokenMismatch: z.boolean()
+});
+
+export const zRunDetail = z.object({
+    runId: z.uuid().regex(/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/),
+    githubRunId: z.int().gt(0).lte(9007199254740991),
+    status: zRunStatus,
+    createdAt: z.iso.datetime().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$/),
+    completedAt: z.iso.datetime().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$/).nullable(),
+    skill: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    skillSha: z.string().regex(/^[0-9a-f]{40}$/),
+    skillVersion: z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
+    cells: z.array(zCell),
+    arms: z.array(zArm),
+    trials: z.int().gte(-9007199254740991).lte(9007199254740991),
+    costUsd: z.number().nullable(),
+    maxUsd: z.number(),
+    verdicts: z.object({
+        helps: z.int().gte(-9007199254740991).lte(9007199254740991),
+        noEffect: z.int().gte(-9007199254740991).lte(9007199254740991),
+        hurts: z.int().gte(-9007199254740991).lte(9007199254740991)
+    }).nullable(),
+    tasks: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)),
+    shards: z.array(zShard),
+    billing: z.array(zShardBilling)
+});
+
+export const zPublishedTrial = z.object({
+    schemaVersion: z.literal(1),
+    skill: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    arm: zArm,
+    harness: zHarness,
+    model: z.string().max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/),
+    task: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    attempt: z.int().gte(1).lte(9007199254740991),
+    trial: z.int().gte(0).lte(9007199254740991),
+    works: z.boolean(),
+    failureClass: zFailureClass,
+    checks: z.record(z.string(), zCheckResult),
+    agentSeconds: z.number().gte(0),
+    agentReported: zAgentReported,
+    graderCommit: z.string().regex(/^[0-9a-f]{40}$/),
+    transcriptPath: z.string().regex(/^[A-Za-z0-9._-][A-Za-z0-9._\/-]{0,255}$/),
+    shard: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    costUsd: z.number().gte(0),
+    artifactUrl: z.url()
+});
+
+export const zArmSummary = z.object({
+    trials: z.int().gte(0).lte(9007199254740991),
+    works: z.number().gte(0).lte(1).nullable(),
+    target: z.number().gte(0).lte(1).nullable(),
+    control: z.number().gte(0).lte(1).nullable(),
+    successes: z.int().gte(0).lte(9007199254740991),
+    tokens: z.object({
+        median: z.number(),
+        p90: z.number()
+    }),
+    turns: z.number(),
+    seconds: z.number(),
+    costUsd: z.number(),
+    costPerSuccessUsd: z.number().nullable(),
+    triggered: z.number().gte(0).lte(1).nullable()
+});
+
+export const zInterval = z.object({
+    estimate: z.number(),
+    low: z.number(),
+    high: z.number()
+});
+
+export const zVerdict = z.enum([
+    'helps',
+    'no-effect',
+    'hurts'
+]);
+
+export const zTrigger = z.object({
+    loadedSuccess: z.int().gte(0).lte(9007199254740991),
+    loadedFailure: z.int().gte(0).lte(9007199254740991),
+    notLoaded: z.int().gte(0).lte(9007199254740991)
+});
+
+export const zCheckRate = z.object({
+    check: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    role: z.enum(['target', 'control']),
+    without: z.object({
+        rate: z.number().gte(0).lte(1).nullable(),
+        n: z.int().gte(0).lte(9007199254740991)
+    }),
+    with: z.object({
+        rate: z.number().gte(0).lte(1).nullable(),
+        n: z.int().gte(0).lte(9007199254740991)
+    })
+});
+
+export const zTaskDelta = z.object({
+    task: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    target: z.object({
+        without: z.number().gte(0).lte(1).nullable(),
+        with: z.number().gte(0).lte(1).nullable()
+    }),
+    checks: z.record(z.string(), z.number().nullable())
+});
+
+export const zModelResult = z.object({
+    harness: zHarness,
+    model: z.string().max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/),
+    without: zArmSummary,
+    with: zArmSummary,
+    delta: z.object({
+        target: zInterval.nullable(),
+        control: zInterval.nullable(),
+        works: zInterval.nullable(),
+        normalizedGain: z.number().nullable(),
+        tokensPct: z.number().nullable(),
+        costUsd: z.number(),
+        turns: z.number(),
+        seconds: z.number()
+    }),
+    verdict: zVerdict.nullable(),
+    regression: z.boolean(),
+    trigger: zTrigger,
+    checks: z.array(zCheckRate),
+    tasks: z.array(zTaskDelta)
+});
+
+export const zResults = z.object({
+    schemaVersion: z.literal(1),
+    skill: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    skillSha: z.string().regex(/^[0-9a-f]{40}$/),
+    skillVersion: z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
+    tasks: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)),
+    targets: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)),
+    controls: z.array(z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)),
+    checkTitles: z.record(z.string(), z.string().max(80)),
+    bootstrap: z.object({
+        resamples: z.int().gt(0).lte(9007199254740991),
+        seed: z.int().gte(-9007199254740991).lte(9007199254740991),
+        confidence: z.number().gt(0).lt(1)
+    }),
+    models: z.array(zModelResult),
+    overall: z.object({
+        verdicts: z.object({
+            helps: z.int().gte(-9007199254740991).lte(9007199254740991),
+            noEffect: z.int().gte(-9007199254740991).lte(9007199254740991),
+            hurts: z.int().gte(-9007199254740991).lte(9007199254740991)
+        }),
+        target: zInterval.nullable(),
+        tokensPct: z.number().nullable(),
+        triggered: z.number().gte(0).lte(1).nullable(),
+        costUsd: z.number(),
+        maxUsd: z.number().nullable()
+    })
+});
+
+export const zCreateRunBody = zCreateRunRequest;
+
+export const zCreateRunResponse2 = zCreateRunResponse;
 
 export const zRevokeKeyPath = z.object({
     run: z.uuid(),
@@ -64,70 +342,9 @@ export const zMintKeyPath = z.object({
     shard: z.string()
 });
 
-export const zMintKeyResponse = z.object({
-    key: z.string().min(1),
-    anthropicBaseUrl: z.url(),
-    openaiBaseUrl: z.url(),
-    provider: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
-    expiresAt: z.iso.datetime().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$/),
-    limitUsd: z.number().gt(0)
-});
+export const zMintKeyResponse = zMintedKey;
 
-export const zUploadTrialsBody = z.object({
-    shard: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
-    attempt: z.int().gte(1).lte(9007199254740991),
-    artifactId: z.int().gt(0).lte(9007199254740991),
-    trials: z.array(z.object({
-        schemaVersion: z.literal(1),
-        skill: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
-        arm: z.enum([
-            'without',
-            'with',
-            'bundle'
-        ]),
-        harness: z.enum([
-            'claude-code',
-            'codex',
-            'opencode'
-        ]),
-        model: z.string().max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/),
-        task: z.string().max(64).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
-        attempt: z.int().gte(1).lte(9007199254740991),
-        trial: z.int().gte(0).lte(9007199254740991),
-        works: z.boolean(),
-        failureClass: z.enum([
-            'none',
-            'no-artifact',
-            'build',
-            'start',
-            'probe',
-            'timeout',
-            'infra'
-        ]),
-        checks: z.record(z.string(), z.object({
-            status: z.enum([
-                'pass',
-                'fail',
-                'na',
-                'error'
-            ]),
-            evidence: z.string().max(1024)
-        })),
-        agentSeconds: z.number().gte(0),
-        agentReported: z.object({
-            triggered: z.boolean(),
-            tokens: z.object({
-                input: z.int().gte(0).lte(9007199254740991),
-                cached: z.int().gte(0).lte(9007199254740991),
-                output: z.int().gte(0).lte(9007199254740991)
-            }),
-            turns: z.int().gte(0).lte(9007199254740991),
-            toolCalls: z.int().gte(0).lte(9007199254740991)
-        }),
-        graderCommit: z.string().regex(/^[0-9a-f]{40}$/),
-        transcriptPath: z.string().regex(/^[A-Za-z0-9._-][A-Za-z0-9._\/-]{0,255}$/)
-    })).max(10)
-});
+export const zUploadTrialsBody = zUploadTrialsRequest;
 
 export const zUploadTrialsPath = z.object({
     run: z.uuid()
@@ -142,7 +359,42 @@ export const zCompleteRunPath = z.object({
     run: z.uuid()
 });
 
-export const zCompleteRunResponse = z.object({
-    reportUrl: z.url(),
-    summaryMarkdown: z.string()
+export const zCompleteRunResponse2 = zCompleteRunResponse;
+
+export const zListRunsResponse = zRunList;
+
+export const zGetRunPath = z.object({
+    run: z.uuid()
+});
+
+export const zGetRunResponse = zRunDetail;
+
+export const zGetRunTrialsPath = z.object({
+    run: z.uuid()
+});
+
+/**
+ * NDJSON: one PublishedTrial per line
+ */
+export const zGetRunTrialsResponse = zPublishedTrial;
+
+export const zGetRunResultsPath = z.object({
+    run: z.uuid()
+});
+
+export const zGetRunResultsResponse = zResults;
+
+export const zGetSchemaPath = z.object({
+    name: z.enum([
+        'run.json',
+        'run-summary.json',
+        'trial.json',
+        'published-trial.json',
+        'results.json',
+        'eval.json'
+    ])
+});
+
+export const zGetReportPath = z.object({
+    run: z.uuid()
 });

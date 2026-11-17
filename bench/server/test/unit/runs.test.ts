@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import { aggregate, type PublishedTrial } from "@podman-desktop/agent-skills-bench-contracts";
+import { aggregate, type PublishedTrial } from "../../src/contracts/index.ts";
 import { describe, expect, it } from "vitest";
 import { expand } from "../../src/runs/runs.service.ts";
 import { summaryMarkdown } from "../../src/runs/summary.ts";

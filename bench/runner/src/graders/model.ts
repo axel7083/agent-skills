@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { CheckResult, CheckStatus, FailureClass } from "@podman-desktop/agent-skills-bench-contracts";
+import type { CheckResult, CheckStatus, FailureClass } from "@podman-desktop/agent-skills-bench-server-client";
 import type { TaskSpec } from "../tasks.ts";
 import type { Containerfile } from "./containerfile.ts";
 

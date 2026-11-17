@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import { aggregate, type PublishedTrial, Results } from "@podman-desktop/agent-skills-bench-contracts";
+import { charts, DARK, jsonForScript, LIGHT, renderReportHtml, tiles } from "@podman-desktop/agent-skills-bench-report";
 import * as vega from "vega";
 import { compile, type TopLevelSpec } from "vega-lite";
 import { describe, expect, it } from "vitest";
-import { charts, DARK, jsonForScript, LIGHT, renderReportHtml, tiles } from "../src/index.ts";
+import { aggregate, type PublishedTrial, Results } from "../../src/contracts/index.ts";
 
 const SHA = "0123456789abcdef0123456789abcdef01234567";
 const spec = { skill: "containerfile-best-practices", tasks: ["task-a", "task-b"], targets: ["healthcheck"], controls: ["non-root"] };

@@ -18,7 +18,7 @@
 
 import { chmodSync, cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Harness, MintedKey, Shard } from "@podman-desktop/agent-skills-bench-contracts";
+import type { Harness, MintedKey, Shard } from "@podman-desktop/agent-skills-bench-server-client";
 import { parse } from "yaml";
 import { z } from "zod";
 import { REPO_ROOT, SANDBOX_LOCK } from "./paths.ts";

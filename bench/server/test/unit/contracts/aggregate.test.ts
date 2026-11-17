@@ -17,7 +17,7 @@
  ***********************************************************************/
 
 import { describe, expect, it } from "vitest";
-import { aggregate, checkScore, type PublishedTrial, Results } from "../src/index.ts";
+import { aggregate, checkScore, type PublishedTrial, Results } from "../../../src/contracts/index.ts";
 import { grid, SHA, spec, trial } from "./fixtures.ts";
 
 const bootstrap = { resamples: 1000, seed: 3, confidence: 0.95 };

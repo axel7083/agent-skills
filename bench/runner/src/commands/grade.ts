@@ -18,7 +18,8 @@
 
 import { existsSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { Shard, type Trial } from "@podman-desktop/agent-skills-bench-contracts";
+import { type Trial } from "@podman-desktop/agent-skills-bench-server-client";
+import { zShard } from "@podman-desktop/agent-skills-bench-server-client/zod";
 import { run } from "../exec.ts";
 import { gradeApp } from "../graders/grade.ts";
 import { REPO_ROOT } from "../paths.ts";
@@ -39,7 +40,7 @@ export interface GradeOptions {
  * no identity: whatever the agent left, it builds and runs here, confined.
  */
 export async function grade(options: GradeOptions): Promise<void> {
-  const shard = Shard.parse(JSON.parse(options.shard));
+  const shard = zShard.parse(JSON.parse(options.shard));
   const task = loadTask(shard.task);
   const head = await run("git", ["rev-parse", "HEAD"], { cwd: REPO_ROOT });
   const graderCommit = head.stdout.trim();

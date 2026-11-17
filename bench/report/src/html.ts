@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { PublishedTrial, Results } from "@podman-desktop/agent-skills-bench-contracts";
+import type { PublishedTrial, Results } from "@podman-desktop/agent-skills-bench-server-client";
 
 export const RESULTS_ELEMENT_ID = "bench-results";
 export const TRIALS_ELEMENT_ID = "bench-trials";
