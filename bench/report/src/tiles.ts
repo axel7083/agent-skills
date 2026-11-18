@@ -17,7 +17,7 @@
  ***********************************************************************/
 
 import type { Results } from "@podman-desktop/agent-skills-bench-server-client";
-import { percent, points, signedPercent, usd } from "./format.ts";
+import { percent, points, signedGrouped, usd } from "./format.ts";
 
 /** A headline number: label, value, and the line that qualifies it. Status always carries an icon. */
 export interface Tile {
@@ -27,8 +27,10 @@ export interface Tile {
 }
 
 export function tiles(results: Results): Tile[] {
-  const { verdicts, target, tokensPct, triggered, costUsd, maxUsd } = results.overall;
+  const { verdicts, target, triggered, costUsd, maxUsd } = results.overall;
   const models = results.models.length;
+  // What the skill adds to a typical trial, averaged over the models.
+  const added = models === 0 ? null : results.models.reduce((sum, model) => sum + model.with.tokens.median - model.without.tokens.median, 0) / models;
   const verdict =
     verdicts.helps === models && models > 0
       ? "✅ Helps"
@@ -44,14 +46,14 @@ export function tiles(results: Results): Tile[] {
       detail: `helps ${verdicts.helps} · no effect ${verdicts.noEffect} · hurts ${verdicts.hurts} of ${models} models`,
     },
     {
-      label: "Target checks",
+      label: "Taught practices followed",
       value: target === null ? "–" : points(target.estimate),
-      detail: target === null ? "not enough data" : `95% CI ${points(target.low)} to ${points(target.high)}, all models`,
+      detail: target === null ? "not enough data" : `95% range ${points(target.low)} to ${points(target.high)}, all models`,
     },
     {
-      label: "Tokens per trial",
-      value: signedPercent(tokensPct),
-      detail: "median, with vs without",
+      label: "Tokens the skill adds",
+      value: added === null ? "–" : signedGrouped(added),
+      detail: "per typical trial, average of the models",
     },
     {
       label: "Skill loaded",

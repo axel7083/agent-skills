@@ -17,7 +17,7 @@
  ***********************************************************************/
 
 import type { ModelResult, Results } from "../contracts/index.ts";
-import { interval, percent, points, signedPercent, signedUsd, usd } from "@podman-desktop/agent-skills-bench-report";
+import { interval, percent, points, signedGrouped, signedUsd, usd } from "@podman-desktop/agent-skills-bench-report";
 
 const VERDICTS: Record<NonNullable<ModelResult["verdict"]>, string> = {
   helps: "✅ Helps",
@@ -36,13 +36,13 @@ export function summaryMarkdown(results: Results, reportUrl: string): string {
     "",
     `Skill \`${results.skillSha.slice(0, 7)}\` · ${String(results.tasks.length)} tasks · ${String(results.models.length)} models · [full report](${reportUrl})`,
     "",
-    `**Target checks ${overall.target === null ? "–" : points(overall.target.estimate)}** (95% CI ${
+    `**Taught practices followed ${overall.target === null ? "–" : points(overall.target.estimate)}** (95% range ${
       overall.target === null ? "–" : `${points(overall.target.low)} to ${points(overall.target.high)}`
-    }) · tokens ${signedPercent(overall.tokensPct)} · skill loaded in ${percent(overall.triggered)} of trials · cost ${usd(overall.costUsd)}${
+    }) · skill loaded in ${percent(overall.triggered)} of trials · cost ${usd(overall.costUsd)}${
       overall.maxUsd === null ? "" : ` of ${usd(overall.maxUsd)}`
     }`,
     "",
-    "| Model | Verdict | Target checks | Δ [95% CI] | Tokens | Cost / trial | Skill loaded | Works Δ |",
+    "| Model | Verdict | Taught practices followed | Change [95% range] | Tokens the skill adds | Cost / trial | Skill loaded | Works Δ |",
     "|---|---|---|---|---|---|---|---|",
     ...results.models.map((result) =>
       [
@@ -50,7 +50,7 @@ export function summaryMarkdown(results: Results, reportUrl: string): string {
         `${result.verdict === null ? "… Not enough data" : VERDICTS[result.verdict]}${result.regression ? " ⚠ regression" : ""}`,
         `${percent(result.without.target)} → ${percent(result.with.target)}`,
         interval(result.delta.target),
-        signedPercent(result.delta.tokensPct),
+        signedGrouped(result.with.tokens.median - result.without.tokens.median),
         signedUsd(result.delta.costUsd),
         percent(result.with.triggered),
         result.delta.works === null ? "–" : points(result.delta.works.estimate),

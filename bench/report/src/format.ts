@@ -61,3 +61,14 @@ export function compact(value: number): string {
   if (Math.abs(value) >= 1_000) return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}K`;
   return value.toFixed(0);
 }
+
+/** A whole number grouped by thousands: `1,234,567`. */
+export function grouped(value: number): string {
+  return Math.round(value).toLocaleString("en-US");
+}
+
+/** A signed whole number grouped by thousands: `+10,086`, `−3`. */
+export function signedGrouped(value: number): string {
+  const rounded = Math.round(value);
+  return `${rounded > 0 ? "+" : rounded < 0 ? "−" : "±"}${grouped(Math.abs(rounded))}`;
+}

@@ -81,6 +81,8 @@ export function vegaConfig(theme: Theme): Config {
   return {
     background: theme.surface,
     font: FONT,
+    // Tooltips and labels without a format of their own: grouped by thousands (106,470, not 106470).
+    numberFormat: ",.6~r",
     padding: 8,
     view: { stroke: null },
     axis: {

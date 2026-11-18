@@ -34,7 +34,8 @@ import {
   type CheckResult,
   type EvalSpec,
   type Harness,
-  type PublishedTrial,
+  PublishedTrial,
+  Results,
   seededRandom,
 } from "../src/contracts/index.ts";
 import { renderReportHtml } from "@podman-desktop/agent-skills-bench-report";
@@ -207,16 +208,31 @@ function trials(): PublishedTrial[] {
 const outDir = join(import.meta.dirname, "..", "dist-mockup");
 /** The report's bundle (bench/report/dist/assets): build the report first. */
 const assets = join(dirname(fileURLToPath(import.meta.resolve("@podman-desktop/agent-skills-bench-report"))), "..", "dist", "assets");
-const data = trials();
-const results = aggregate({
-  spec,
-  skillSha: SHA,
-  skillVersion: "0.1.0",
-  trials: data,
-  costUsd: data.reduce((sum, trial) => sum + trial.costUsd, 0),
-  maxUsd: 40,
-  checkTitles,
-});
+/**
+ * `--run <url>`: a published run's raw data (…/api/v1/runs/<id>), aggregated again with this
+ * checkout's code, to iterate on the report with real numbers. Without it: the invented data above.
+ */
+const runIndex = process.argv.indexOf("--run");
+const runUrl = runIndex >= 0 ? process.argv[runIndex + 1] : undefined;
+let data: PublishedTrial[];
+let results: ReturnType<typeof aggregate>;
+if (runUrl === undefined) {
+  data = trials();
+  results = aggregate({ spec, skillSha: SHA, skillVersion: "0.1.0", trials: data, costUsd: data.reduce((sum, trial) => sum + trial.costUsd, 0), maxUsd: 40, checkTitles });
+} else {
+  const published = Results.parse(await (await fetch(`${runUrl}/results`)).json());
+  const lines = (await (await fetch(`${runUrl}/trials`)).text()).trim().split("\n");
+  data = lines.map((line) => PublishedTrial.parse(JSON.parse(line)));
+  results = aggregate({
+    spec: { skill: published.skill, tasks: published.tasks, targets: published.targets, controls: published.controls },
+    skillSha: published.skillSha,
+    skillVersion: published.skillVersion,
+    trials: data,
+    costUsd: published.overall.costUsd,
+    maxUsd: published.overall.maxUsd,
+    checkTitles: published.checkTitles,
+  });
+}
 
 await mkdir(outDir, { recursive: true });
 await cp(assets, outDir, { recursive: true });
@@ -224,6 +240,6 @@ await writeFile(join(outDir, "results.json"), `${JSON.stringify(results, null, 2
 await writeFile(join(outDir, "trials.ndjson"), data.map((trial) => JSON.stringify(trial)).join("\n") + "\n");
 await writeFile(
   join(outDir, "index.html"),
-  renderReportHtml({ results, trials: data, scriptUrl: "report.js", styleUrl: "report.css", synthetic: true }),
+  renderReportHtml({ results, trials: data, scriptUrl: "report.js", styleUrl: "report.css", synthetic: runUrl === undefined }),
 );
 console.log(`mockup written to ${outDir}`);
